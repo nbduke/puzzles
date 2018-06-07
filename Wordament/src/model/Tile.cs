@@ -1,34 +1,27 @@
-﻿/*
- * Tile.cs
- * 
- * Nathan Duke
- * 3/15/15
- * 
- * Contains the Tile class and the TileType enum. Tile represents a single position
- * on a Wordament grid, including its characters and score. TileType is used to
- * differentiate types of Wordament tiles, such as Prefix and Suffix.
- */
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 
-using CommonTools.DataStructures;
+using Tools.DataStructures;
 
-namespace Wordament
+namespace Wordament.Model
 {
 	public enum TileType
 	{
 		Normal,
 		Prefix,
 		Suffix,
-		EitherOr
+		Alternating
 	}
 
+	/// <summary>
+	/// Represents a single position on a Wordament grid, including its
+	/// letters and score.
+	/// </summary>
 	public class Tile
 	{
 		public string Letters { get; private set; }
-		public string OrLetters { get; private set; }
+		public string AlternateLetters { get; private set; }
 		public int Score { get; private set; }
 		public GridCell Location { get; private set; }
 		public TileType Type { get; private set; }
@@ -41,19 +34,19 @@ namespace Wordament
 		public Tile(string letters, int score, GridCell location, TileType type)
 		{
 			Letters = letters;
-			OrLetters = string.Empty;
+			AlternateLetters = string.Empty;
 			Score = score;
 			Location = location;
 			Type = type;
 		}
 
-		public Tile(string letters, string orLetters, int score, GridCell location)
+		public Tile(string letters, string alternateLetters, int score, GridCell location)
 		{
 			Letters = letters;
-			OrLetters = orLetters;
+			AlternateLetters = alternateLetters;
 			Score = score;
 			Location = location;
-			Type = TileType.EitherOr;
+			Type = TileType.Alternating;
 		}
 
 		public static Tile Parse(string tileStr, int score, GridCell location)
@@ -73,10 +66,10 @@ namespace Wordament
 			}
 			else if (tileStr.Contains('/'))
 			{
-				// Parse an either/or Tile
+				// Parse an alternating Tile
 				string[] options = tileStr.Split('/');
 				if (options.Length != 2)
-					throw new InvalidDataException("String could not be parsed. The format for an either-or tile is STRING1/STRING2");
+					throw new InvalidDataException("String could not be parsed. The format for an alternating is STRING1/STRING2");
 				else
 					return new Tile(options[0], options[1], score, location);
 			}

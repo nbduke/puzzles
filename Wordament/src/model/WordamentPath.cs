@@ -1,45 +1,46 @@
-﻿/*
- * WordamentPath.cs
- * 
- * Nathan Duke
- * 3/15/15
- * 
- * Contains the WordamentPath class, which represents a unique path of Tiles
- * on the Wordament grid. The path is represented by a list of GridCells and
- * a string which is the concatenation of all the Tile strings.
- */
+﻿using System.Collections.Generic;
 
-using System.Collections.Generic;
+using Tools;
+using Tools.DataStructures;
+using System.Linq;
 
-using CommonTools.DataStructures;
-
-namespace Wordament
+namespace Wordament.Model
 {
+	/// <summary>
+	/// Represents a word-path pair in the Wordament puzzle grid.
+	/// </summary>
 	public class WordamentPath
 	{
-		public string Word { get; private set; }
-		public List<GridCell> Path { get; private set; }
-		public int TotalTileScore { get; private set; }
-		public int WordScore { get; private set; }
+		public readonly string Word;
+		public readonly List<GridCell> Locations;
+		public readonly int TotalScore;
 
-		public WordamentPath(string word, List<GridCell> path, int totalTileScore)
+		internal WordamentPath(IEnumerable<WordSearchState> statePath)
 		{
-			Word = word;
-			Path = path;
-			TotalTileScore = totalTileScore;
-			ApplyWordMultiplier();
+			Validate.IsNotNull(statePath, "statePath");
+
+			Word = statePath.Select(state => state.CurrentString)
+				.Aggregate((aggregate, next) =>
+				{
+					return aggregate + next;
+				});
+
+			Locations = new List<GridCell>(statePath.Select(state => state.LastTileAdded.Location));
+
+			int totalTileScore = statePath.Select(state => state.LastTileAdded.Score).Sum();
+			TotalScore = (int)(totalTileScore * GetWordMultiplier());
 		}
 
-		private void ApplyWordMultiplier()
+		private double GetWordMultiplier()
 		{
 			if (Word.Length == 5)
-				WordScore = (int)(TotalTileScore * 1.5);
+				return 1.5;
 			else if (Word.Length == 6 || Word.Length == 7)
-				WordScore = TotalTileScore * 2;
+				return 2;
 			else if (Word.Length >= 8)
-				WordScore = (int)(TotalTileScore * 2.5);
+				return 2.5;
 			else
-				WordScore = TotalTileScore;
+				return 1;
 		}
 	}
 }

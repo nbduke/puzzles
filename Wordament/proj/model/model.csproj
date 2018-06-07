@@ -33,6 +33,9 @@
     <RootNamespace>Model</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="custom-tools">
+      <HintPath>..\..\..\..\custom-tools\bin\custom-tools\Release\custom-tools.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,8 +47,8 @@
   <ItemGroup>
     <Compile Include="..\..\src\model\Tile.cs" />
     <Compile Include="..\..\src\model\WordamentPath.cs" />
-    <Compile Include="..\..\src\model\WordBuilder.cs" />
     <Compile Include="..\..\src\model\WordFinder.cs" />
+	<Compile Include="..\..\src\model\WordSearchState.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
