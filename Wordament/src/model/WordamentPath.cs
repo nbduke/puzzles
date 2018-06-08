@@ -19,12 +19,7 @@ namespace Wordament.Model
 		{
 			Validate.IsNotNull(statePath, "statePath");
 
-			Word = statePath.Select(state => state.CurrentString)
-				.Aggregate((aggregate, next) =>
-				{
-					return aggregate + next;
-				});
-
+			Word = statePath.Last().CurrentString;
 			Locations = new List<GridCell>(statePath.Select(state => state.LastTileAdded.Location));
 
 			int totalTileScore = statePath.Select(state => state.LastTileAdded.Score).Sum();

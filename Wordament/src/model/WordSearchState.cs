@@ -77,7 +77,7 @@ namespace Wordament.Model
 		{
 			WordSearchState otherState = other as WordSearchState;
 			return otherState != null
-				&& LastTileAdded.Location.Equals(LastTileAdded.Location);
+				&& LastTileAdded.Location.Equals(otherState.LastTileAdded.Location);
 		}
 
 		public override int GetHashCode()

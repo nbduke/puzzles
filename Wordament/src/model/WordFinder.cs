@@ -30,7 +30,7 @@ namespace Wordament.Model
 
 		/// <summary>
 		/// Computes all words in the puzzle grid. Returns a list of unique
-		/// word-paths sorted in descending order by total score.
+		/// word-paths in alphabetical order.
 		/// </summary>
 		/// <param name="minimumWordLength">the minimum length for a word to count</param>
 		public List<WordamentPath> FindWordsWithPaths(uint minimumWordLength = 1)
@@ -54,8 +54,7 @@ namespace Wordament.Model
 				}
 			}
 
-			return new List<WordamentPath>(AllWordPaths.Values.OrderByDescending(
-				path => path.TotalScore));
+			return new List<WordamentPath>(AllWordPaths.Values);
 		}
 
 		/*

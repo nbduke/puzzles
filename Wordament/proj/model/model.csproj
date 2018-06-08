@@ -30,7 +30,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>Model</RootNamespace>
+    <RootNamespace>Wordament.Model</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="custom-tools">
