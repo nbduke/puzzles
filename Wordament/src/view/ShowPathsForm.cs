@@ -99,10 +99,10 @@ namespace Wordament.View
 				return;
 			}
 
-			// label1 and label2 are used to display the current word and its score, respectively
 			WordamentPath nextPath = AllPaths[NextPathIdx++];
-			label1.Invoke(new EventHandler(delegate { label1.Text = nextPath.Word; }));
-			label2.Invoke(new EventHandler(delegate { label2.Text = nextPath.TotalScore.ToString(); }));
+			WordLabel.Invoke(new EventHandler(delegate { WordLabel.Text = nextPath.Word; }));
+			ScoreLabel.Invoke(new EventHandler(delegate { ScoreLabel.Text = nextPath.TotalScore.ToString(); }));
+			CounterLabel.Invoke(new EventHandler(delegate { CounterLabel.Text = $"{NextPathIdx}/{AllPaths.Count}"; }));
 
 			if (nextPath.Locations.Count == 1)
 			{
