@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{36F689CC-ABE1-4118-A363-BD0415E29D69}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>CrosswordLottery.View</RootNamespace>
-    <AssemblyName>CrosswordLottery</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <ProjectGuid>{F091B275-1034-4847-B9D0-BA1711815B1E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CrosswordLottery.Model</RootNamespace>
+    <AssemblyName>model</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
@@ -32,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="custom-tools">
+      <HintPath>..\..\..\..\custom-tools\bin\custom-tools\Release\custom-tools.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,17 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\src\view\Program.cs" />
+    <Compile Include="..\..\src\model\Constants.cs" />
+    <Compile Include="..\..\src\model\CrosswordAnalysis.cs" />
+    <Compile Include="..\..\src\model\CrosswordContent.cs" />
+    <Compile Include="..\..\src\model\ILotteryModel.cs" />
+    <Compile Include="..\..\src\model\ILotteryTicket.cs" />
+    <Compile Include="..\..\src\model\LotteryTicket.cs" />
+    <Compile Include="..\..\src\model\M0.cs" />
+    <Compile Include="..\..\src\model\M1.cs" />
+    <Compile Include="..\..\src\model\M2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\model\model.csproj">
-      <Project>{f091b275-1034-4847-b9d0-ba1711815b1e}</Project>
-      <Name>model</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
