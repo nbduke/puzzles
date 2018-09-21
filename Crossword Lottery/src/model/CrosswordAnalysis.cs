@@ -2,6 +2,9 @@
 
 namespace CrosswordLottery.Model
 {
+	/*
+	 * Contains extension methods for analyzing a crossword puzzle.
+	 */
 	static class CrosswordAnalysis
 	{
 		public static uint CountRevealedWords(this CrosswordContent content, IEnumerable<char> givenCharacters)

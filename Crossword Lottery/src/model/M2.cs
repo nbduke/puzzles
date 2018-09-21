@@ -5,6 +5,10 @@ using Tools.DataStructures;
 
 namespace CrosswordLottery.Model
 {
+	/// <summary>
+	/// Builds on the simple adversary model by requiring exactly N vowels
+	/// to be given.
+	/// </summary>
 	public class M2 : ILotteryModel
 	{
 		private Arrangement<char> Vowels = new Arrangement<char>(Constants.Vowels);

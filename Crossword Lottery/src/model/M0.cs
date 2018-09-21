@@ -3,6 +3,9 @@ using Tools.Math;
 
 namespace CrosswordLottery.Model
 {
+	/// <summary>
+	/// A model of the random variable from the uniform distribution.
+	/// </summary>
 	public class M0 : ILotteryModel
 	{
 		private Arrangement<char> Alphabet = new Arrangement<char>(Constants.Alphabet);

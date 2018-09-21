@@ -5,6 +5,11 @@ using Tools.DataStructures;
 
 namespace CrosswordLottery.Model
 {
+	/// <summary>
+	/// Models a probability distribution chosen by a simple adversary:
+	/// the probability of a given set of letters is proportional to the
+	/// number of words excluded from the crossword by that set.
+	/// </summary>
 	public class M1 : ILotteryModel
 	{
 		private Arrangement<char> Alphabet = new Arrangement<char>(Constants.Alphabet);

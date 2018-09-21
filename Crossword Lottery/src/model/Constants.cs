@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace CrosswordLottery.Model
 {
+	/*
+	 * Contains useful constants for crossword models and analysis.
+	 */
 	static class Constants
 	{
 		public const char EmptySquare = '\0';
