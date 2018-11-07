@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Tools.DataStructures;
@@ -14,7 +11,7 @@ namespace Wordament.View
 		public static PrefixTreeDictionary Dictionary = null;
 
 		private static string tileScoresFilename = "../../resources/tile_scores.txt";
-		private static string dictFilename = "../../resources/large_dict.txt";
+		private static string dictFilename = "../../../resources/large_dict.txt";
 
 		/// <summary>
 		/// The main entry point for the application.
