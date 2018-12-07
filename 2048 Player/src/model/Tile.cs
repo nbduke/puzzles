@@ -12,6 +12,11 @@ namespace Player.Model
 		public readonly GridCell Cell;
 		public readonly int Value;
 
+		public Tile(int row, int column, int value)
+			: this(new GridCell(row, column), value)
+		{
+		}
+
 		public Tile(GridCell cell, int value)
 		{
 			Validate.IsTrue(value != 0, "A tile cannot represent zero");

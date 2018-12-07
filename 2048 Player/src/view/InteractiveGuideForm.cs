@@ -191,7 +191,7 @@ namespace Player.View
 
 				if (Int32.TryParse(popup.UserInput, out int num) && num > 0)
 				{
-					State.AddTile(new Tile(new GridCell(row, column), num));
+					State.AddTile(new Tile(row, column, num));
 					GridButtons[row, column].Text = num.ToString();
 					GridButtons[row, column].BackColor = Color.Orange;
 				}

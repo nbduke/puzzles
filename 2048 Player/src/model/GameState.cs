@@ -17,7 +17,6 @@ namespace Player.Model
 	{
 		public const int DEFAULT_GOAL = 2048;
 		public const int GRID_SIZE = 4;
-		public const int NUM_ACTIONS = 4;
 
 		public readonly int GoalNumber;
 		public int HighestNumber { get; private set; }
@@ -135,7 +134,7 @@ namespace Player.Model
 			get
 			{
 				return !IsWin
-					&& !IsFull
+					&& IsFull
 					&& GetLegalActions().Count() == 0;
 			}
 		}
@@ -358,6 +357,13 @@ namespace Player.Model
 			return number;
 		}
 
+		public override bool Equals(object obj)
+		{
+			return (obj is GameState other) &&
+				GoalNumber == other.GoalNumber &&
+				Grid.SequenceEqual(other.Grid);
+		}
+
 		public override int GetHashCode()
 		{
 			unchecked
@@ -477,13 +483,12 @@ namespace Player.Model
 		}
 
 		/*
-		 * Performs the operation that implements actions on the GameState.
+		 * Condenses a sequence from the grid by adding duplicate numbers that are
+		 * adjacent or separated by empty cells.
 		 */
 		private List<int> CondenseAndShift(IEnumerable<int> sequence)
 		{
-			// Condense by adding duplicate numbers that are adjacent or separated
-			// by empty cells
-			List<int> result = new List<int>();
+			List<int> result = new List<int>(GRID_SIZE);
 			int previousNumber = 0;
 
 			foreach (int number in sequence)
@@ -503,10 +508,10 @@ namespace Player.Model
 				}
 			}
 
-			// Add zeros to fill the list
+			// Prepend zeros to fill the list
 			for (int i = result.Count; i < GRID_SIZE; ++i)
 			{
-				result.Add(0);
+				result.Insert(0, 0);
 			}
 
 			return result;
