@@ -94,7 +94,7 @@ namespace Player.Model
 			DateTime start = DateTime.Now;
 			do
 			{
-				av = Player.GetPolicy(state, SetDepthLimit(state));
+				av = Player.GetPolicy(state, new DepthLimit(state));
 				state.DoAction(av.Action);
 				state.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
 				++turnsTaken;
@@ -108,18 +108,6 @@ namespace Player.Model
 				TurnsTaken = turnsTaken,
 				DurationMinutes = (end - start).TotalMinutes
 			};
-		}
-
-		private DepthLimit SetDepthLimit(GameState state)
-		{
-			if (state.CellsFilled <= 4)
-				return new DepthLimit(3);
-			else if (state.CellsFilled <= 8)
-				return new DepthLimit(4);
-			else if (state.CellsFilled <= 12)
-				return new DepthLimit(6);
-			else
-				return new DepthLimit(8);
 		}
 	}
 }

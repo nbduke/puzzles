@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using Tools.Math;
-using Tools.DataStructures;
 
 namespace Player.Model
 {
@@ -20,203 +16,144 @@ namespace Player.Model
 
 		private const double NO_VALUE = double.MinValue;
 
-		private int AvailableTasks;
-		private readonly object Mutex;
-		private readonly Action[] AllActions;
-
-		public ExpectimaxPlayer()
+		private readonly Action[] Actions = new Action[]
 		{
-			AvailableTasks = Math.Max(Environment.ProcessorCount - 1, 0);
-			Mutex = new object();
-			AllActions = new Action[]
-			{
-				Action.Up, Action.Down,
-				Action.Right, Action.Left
-			};
-		}
+			Action.Left, Action.Up, Action.Right, Action.Down
+		};
 
 		/// <summary>
-		/// Returns the optimal ActionValue for a given state.
-		/// </summary>
-		/// <remarks>
-		/// In expectimax, the optimal action is the one which maximizes the expected
-		/// value of the game state that would result from taking that action.
-		/// </remarks>
-		/// <param name="state">the state</param>
-		public ActionValue GetPolicy(GameState state)
-		{
-			return GetPolicy(state, new NoLimit());
-		}
-
-		/// <summary>
-		/// Returns the optimal ActionValue for a given state, subject to search limitations.
+		/// Returns the best action to take in a given state, with its expected value.
 		/// </summary>
 		/// <param name="state">the state</param>
-		/// <param name="searchLimit">the limit imposed on the search space</param>
+		/// <param name="searchLimit">defines limits on the search algorithm</param>
+		/// <returns></returns>
 		public ActionValue GetPolicy(GameState state, ISearchLimit searchLimit)
 		{
-			var allPolicies = GetPolicies(state, searchLimit);
-			if (allPolicies.Count() == 0)
-				return new ActionValue(Action.NoAction, NO_VALUE);
-			else
-				return allPolicies.Max((a, b) => a.Value < b.Value);
+			ActionValue result = new ActionValue()
+			{
+				Action = Action.NoAction,
+				Value = NO_VALUE
+			};
+
+			foreach (var actionValue in GetPolicies(state, searchLimit))
+			{
+				if (actionValue.Value > result.Value)
+					result = actionValue;
+			}
+
+			return result;
 		}
 
 		/// <summary>
-		/// Returns each legal action from the given state with its expected value.
+		/// Returns an enumerable of actions that may be taken in a given state with
+		/// their corresponding expected values.
 		/// </summary>
+		/// <remarks>
+		/// Higher expected values imply better chances of winning from taking the
+		/// corresponding action.
+		/// </remarks>
 		/// <param name="state">the state</param>
-		public IEnumerable<ActionValue> GetPolicies(GameState state)
-		{
-			return GetPolicies(state, new NoLimit());
-		}
-
-		/// <summary>
-		/// Returns each legal action from the given state with its expected value, subject
-		/// to search limitations.
-		/// </summary>
-		/// <param name="state">the state</param>
-		/// <param name="searchLimit">the limit imposed on the search space</param>
+		/// <param name="searchLimit">defines limits on the search algorithm</param>
 		public IEnumerable<ActionValue> GetPolicies(GameState state, ISearchLimit searchLimit)
 		{
-			RandomProvider.Shuffle(AllActions); // break ties randomly
-			searchLimit.NextSearch();
+			var legalActions = new List<Action>(state.GetLegalActions());
+			RandomProvider.Shuffle(legalActions); // break ties randomly
 
-			foreach (var action in AllActions)
+			foreach (var action in legalActions)
 			{
-				double value = ExpectedValue(new GameState(state), action, searchLimit.Copy());
-				if (value != NO_VALUE) // exclude illegal actions
-					yield return new ActionValue(action, value);
-			}
-		}
+				searchLimit.IncreaseDepth();
+				double value = ExpectedValue(new GameState(state), action, searchLimit);
+				searchLimit.DecreaseDepth();
 
-		/*
-		 * Returns the maximum of the expected values of all states that may be reached from the given state.
-		 */
-		private double MaxValue(GameState state, ISearchLimit searchLimit)
-		{
-			// Base case: the search limit is reached.
-			if (searchLimit.Done())
-				return Evaluate(state);
-
-			searchLimit.NextSearch();
-
-			// Determine how many tasks to spawn.
-			int tasksToSpawn = 0;
-			lock (Mutex)
-			{
-				tasksToSpawn = Math.Min(AvailableTasks, AllActions.Length - 1); // save one calculation for this thread
-				AvailableTasks -= tasksToSpawn;
-			}
-
-			// Launch asynchronous tasks to make some of the recursive calls.
-			var tasks = new Task<double>[AllActions.Length];
-			for (int i = 0; i < tasksToSpawn; ++i)
-			{
-				var action = AllActions[i];
-				tasks[i] = Task.Run(() =>
+				yield return new ActionValue()
 				{
-					return ExpectedValueParallel(new GameState(state), action, searchLimit.Copy());
-				});
+					Action = action,
+					Value = value
+				};
 			}
-
-			// Make any remaining recursive calls in this thread.
-			for (int i = tasksToSpawn; i < AllActions.Length; ++i)
-			{
-				double value = ExpectedValue(new GameState(state), AllActions[i], searchLimit.Copy());
-				tasks[i] = Task.FromResult(value);
-			}
-
-			// Collect results from the tasks
-			Task.WhenAll(tasks).Wait();
-			double maxValue = NO_VALUE;
-
-			foreach (var task in tasks)
-			{
-				if (task.Result > maxValue)
-					maxValue = task.Result;
-			}
-
-			// If maxValue is equal to NO_VALUE, then no legal actions were found, so
-			// return an estimate of the current state's value.
-			if (maxValue == NO_VALUE)
-				return Evaluate(state);
-			else
-				return maxValue;
 		}
 
 		/*
-		 * This method should be called within an asynchronous task. It calls ExpectedValue() and then
-		 * updates the available task count.
-		 */
-		private double ExpectedValueParallel(GameState state, Action action, ISearchLimit searchLimit)
-		{
-			double value = ExpectedValue(state, action, searchLimit);
-			lock (Mutex)
-			{
-				++AvailableTasks;
-			}
-			return value;
-		}
-
-		/*
-		 * Tries every possible nondeterministic outcome of the given state after applying the given action.
-		 * The expected value over all outcomes is returned.
+		 * Calculates the expected value over all possible states that could result from
+		 * taking the given action in the given state.
 		 */
 		private double ExpectedValue(GameState state, Action action, ISearchLimit searchLimit)
 		{
-			// Apply the action. If the action is illegal, return NO_VALUE.
 			if (!state.DoAction(action))
-				return NO_VALUE;
+				return NO_VALUE; // the action was illegal
 
 			var emptyCells = state.GetEmptyCells();
-			double tilePlacementProb = 1.0 / emptyCells.Count();
-			double expValue = 0;
+			double placementProbability = 1.0 / (GameState.TOTAL_CELLS - state.CellsFilled);
+			double probability_2 = placementProbability * TILE_PROB_2;
+			double probability_4 = placementProbability * TILE_PROB_4;
+			double expectedValue = 0;
 
-			// Try all possible '2' tiles
+			// Tries all possible placements of '2' and '4' tiles, calculating the
+			// value of each outcome and aggregating values into the expected value.
 			foreach (var cell in emptyCells)
 			{
-				var tile = new Tile(cell, 2);
-				state.AddTile(tile);
-				expValue += tilePlacementProb * TILE_PROB_2 * MaxValue(state, searchLimit);
-				state.RemoveTile(tile.Cell);
+				var tile_2 = new Tile(cell, 2);
+				state.AddTile(tile_2);
+				expectedValue += MaxValue(state, searchLimit) * probability_2;
+				state.RemoveTile(cell);
+
+				var tile_4 = new Tile(cell, 4);
+				state.AddTile(tile_4);
+				expectedValue += MaxValue(state, searchLimit) * probability_4;
+				state.RemoveTile(cell);
 			}
 
-			// Try all possible '4' tiles
-			foreach (var cell in emptyCells)
-			{
-				var tile = new Tile(cell, 4);
-				state.AddTile(tile);
-				expValue += tilePlacementProb * TILE_PROB_4 * MaxValue(state, searchLimit);
-				state.RemoveTile(tile.Cell); // undo the change
-			}
-
-			return expValue;
+			return expectedValue;
 		}
 
 		/*
-		 * Returns an estimated value of the given state. Losing states have value 0. Winning states have a value
-		 * equal to the sum of the squared numbers on the grid. All other states' values are equal to the sum of
-		 * the squared numbers on the grid divided by the squared count of tiles.
+		 * Returns the maximum value over all states reachable from the given state.
+		 */
+		private double MaxValue(GameState state, ISearchLimit searchLimit)
+		{
+			if (state.IsWin)
+				return 100.0 * state.GoalNumber * state.GoalNumber;
+			else if (state.IsLoss)
+				return 0;
+			else if (searchLimit.Done())
+				return Evaluate(state);
+
+			double maxValue = NO_VALUE;
+			foreach (var action in Actions)
+			{
+				searchLimit.IncreaseDepth();
+				double expectedValue = ExpectedValue(new GameState(state), action, searchLimit);
+				searchLimit.DecreaseDepth();
+
+				if (expectedValue > maxValue)
+					maxValue = expectedValue;
+			}
+
+			return maxValue;
+		}
+
+		/*
+		 * Returns an estimated value of the given state. The estimate is calculated by
+		 * dividing the sum of the squared numbers on the grid by the squared count of
+		 * tiles.
 		 */
 		public double Evaluate(GameState state)
 		{
-			if (state.IsLoss)
-				return 0;
-
-			// Get the sum of squared tile numbers
-			var tiles = state.GetTiles();
 			double sumSq = 0;
-
-			foreach (Tile t in tiles)
+			foreach (Tile t in state.GetTiles())
 			{
 				sumSq += t.Value * t.Value;
 			}
 
-			if (state.IsWin)
-				return sumSq;
-			else
-				return sumSq / (state.CellsFilled * state.CellsFilled);
+			double score = sumSq / (state.CellsFilled * state.CellsFilled);
+
+			if (state[0, 0] == state.HighestNumber ||
+				state[0, 3] == state.HighestNumber ||
+				state[3, 0] == state.HighestNumber ||
+				state[3, 3] == state.HighestNumber)
+				score *= 1.5;
+
+			return score;
 		}
 	}
 }

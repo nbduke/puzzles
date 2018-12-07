@@ -11,13 +11,13 @@
 		bool Done();
 
 		/// <summary>
-		/// Advances to the next layer of the search.
+		/// Records an increase in the depth of the decision tree.
 		/// </summary>
-		void NextSearch();
+		void IncreaseDepth();
 
 		/// <summary>
-		/// Returns a copy of this search limit instance.
+		/// Records a decrease in the depth of the decision tree.
 		/// </summary>
-		ISearchLimit Copy();
+		void DecreaseDepth();
 	}
 }

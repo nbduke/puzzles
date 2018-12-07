@@ -9,8 +9,8 @@ namespace Player.Model
 	public class NoLimit : ISearchLimit
 	{
 		public bool Done() { return false; }
-		public void NextSearch() { }
-		public ISearchLimit Copy() { return new NoLimit(); }
+		public void IncreaseDepth() { }
+		public void DecreaseDepth() { }
 	}
 
 	/// <summary>
@@ -21,6 +21,25 @@ namespace Player.Model
 		public readonly int MaxDepth;
 		public int Depth { get; private set; }
 
+		/// <summary>
+		/// Creates a DepthLimit tailored for the initial state of the search.
+		/// </summary>
+		/// <param name="initialState">the initial state</param>
+		public DepthLimit(GameState initialState)
+		{
+			Depth = 0;
+			if (initialState.CellsFilled <= 3)
+				MaxDepth = 2;
+			else if (initialState.CellsFilled <= 12)
+				MaxDepth = 3;
+			else
+				MaxDepth = 4;
+		}
+
+		/// <summary>
+		/// Creates a DepthLimit with a fixed maximum depth.
+		/// </summary>
+		/// <param name="maxDepth">the maximum depth</param>
 		public DepthLimit(int maxDepth)
 		{
 			Validate.IsTrue(maxDepth > 0, "the maximum depth must be positive");
@@ -34,16 +53,14 @@ namespace Player.Model
 			return Depth >= MaxDepth;
 		}
 
-		public void NextSearch()
+		public void IncreaseDepth()
 		{
 			++Depth;
 		}
 
-		public ISearchLimit Copy()
+		public void DecreaseDepth()
 		{
-			DepthLimit dl = new DepthLimit(MaxDepth);
-			dl.Depth = Depth;
-			return dl;
+			--Depth;
 		}
 	}
 }

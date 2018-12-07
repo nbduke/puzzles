@@ -198,19 +198,6 @@ namespace Player.View
 			}
 		}
 
-		// TODO extract this logic to a class
-		private DepthLimit SetDepthLimit(GameState state)
-		{
-			if (state.CellsFilled <= 4)
-				return new DepthLimit(3);
-			else if (state.CellsFilled <= 8)
-				return new DepthLimit(4);
-			else if (state.CellsFilled <= 12)
-				return new DepthLimit(6);
-			else
-				return new DepthLimit(8);
-		}
-
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
 		{
 			if (_Mode == Mode.Play || _Mode == Mode.Guide)
@@ -260,7 +247,7 @@ namespace Player.View
 			ClearLabels();
 
 			var async = new Task<List<ActionValue>>(
-				() => new List<ActionValue>(Player.GetPolicies(State, SetDepthLimit(State))));
+				() => new List<ActionValue>(Player.GetPolicies(State, new DepthLimit(State))));
 
 			async.ContinueWith((parent) =>
 			{
@@ -390,7 +377,7 @@ namespace Player.View
 
 			Task.Run(() =>
 			{
-				ActionValue av = Player.GetPolicy(State, SetDepthLimit(State));
+				ActionValue av = Player.GetPolicy(State, new DepthLimit(State));
 
 				while (_Mode == Mode.Simulate && av.Action != Model.Action.NoAction)
 				{
@@ -402,8 +389,8 @@ namespace Player.View
 						label1.Text = av.Action.ToString();
 					}));
 
-					av = Player.GetPolicy(State, SetDepthLimit(State));
-						
+					av = Player.GetPolicy(State, new DepthLimit(State));
+
 					int duration = (int)(DateTime.Now - start).TotalMilliseconds;
 					if (duration < TimerDelayMs)
 						Thread.Sleep(TimerDelayMs - duration);

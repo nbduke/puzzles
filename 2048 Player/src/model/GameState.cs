@@ -17,6 +17,7 @@ namespace Player.Model
 	{
 		public const int DEFAULT_GOAL = 2048;
 		public const int GRID_SIZE = 4;
+		public const int TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
 		public readonly int GoalNumber;
 		public int HighestNumber { get; private set; }
