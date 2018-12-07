@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using Tools.DataStructures;
@@ -17,46 +16,12 @@ namespace Player.Model
 	{
 		public const int DEFAULT_GOAL = 2048;
 		public const int GRID_SIZE = 4;
-		public const int TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
 		public readonly int GoalNumber;
 		public int HighestNumber { get; private set; }
-		public int CellsFilled { get; private set; }
+		public int FilledCells { get; private set; }
 
-		private readonly Grid<int> Grid;
-
-		/// <summary>
-		/// Creates a GameState from the contents of a file.
-		/// </summary>
-		/// <param name="filename">the name of the file to parse</param>
-		/// <param name="goalNumber">the goal number of the created state (2048 by default)</param>
-		public static GameState CreateFromFile(string filename, int goalNumber = DEFAULT_GOAL)
-		{
-			GameState state = new GameState(goalNumber);
-			using (StreamReader sr = new StreamReader(File.OpenRead(filename)))
-			{
-				int row = 0;
-				while (row < GRID_SIZE && !sr.EndOfStream)
-				{
-					string[] values = sr.ReadLine().Split(
-						new char[] { ' ' },
-						StringSplitOptions.RemoveEmptyEntries);
-					int column = 0;
-
-					foreach (string value in values.Take(GRID_SIZE))
-					{
-						if (int.TryParse(value, out int number))
-							state.Grid[row, column++] = number;
-					}
-
-					++row;
-				}
-
-				state.UpdateStatistics();
-			}
-
-			return state;
-		}
+		internal readonly Grid<int> Grid;
 
 		/// <summary>
 		/// Creates an initial state with two tiles placed randomly.
@@ -78,7 +43,7 @@ namespace Player.Model
 		{
 			GoalNumber = goalNumber;
 			HighestNumber = 0;
-			CellsFilled = 0;
+			FilledCells = 0;
 			Grid = new Grid<int>(GRID_SIZE, GRID_SIZE, 0);
 		}
 
@@ -90,7 +55,7 @@ namespace Player.Model
 		{
 			GoalNumber = other.GoalNumber;
 			HighestNumber = other.HighestNumber;
-			CellsFilled = other.CellsFilled;
+			FilledCells = other.FilledCells;
 			Grid = new Grid<int>(other.Grid);
 		}
 
@@ -147,7 +112,18 @@ namespace Player.Model
 		{
 			get
 			{
-				return CellsFilled == Grid.Cells;
+				return EmptyCells == 0;
+			}
+		}
+
+		/// <summary>
+		/// Returns the number of empty cells in the grid.
+		/// </summary>
+		public int EmptyCells
+		{
+			get
+			{
+				return Grid.Cells - FilledCells;
 			}
 		}
 
@@ -287,7 +263,7 @@ namespace Player.Model
 			if (IsCellEmpty(t.Cell))
 			{
 				Grid[t.Cell] = t.Value;
-				++CellsFilled;
+				++FilledCells;
 
 				if (t.Value > HighestNumber)
 					HighestNumber = t.Value;
@@ -348,7 +324,7 @@ namespace Player.Model
 			if (number != 0)
 			{
 				Grid[row, column] = 0;
-				--CellsFilled;
+				--FilledCells;
 
 				if (number == HighestNumber)
 					UpdateStatistics();
@@ -399,14 +375,14 @@ namespace Player.Model
 		 */
 		private void UpdateStatistics()
 		{
-			CellsFilled = 0;
+			FilledCells = 0;
 			HighestNumber = 0;
 
 			foreach (int number in Grid)
 			{
 				if (number != 0)
 				{
-					++CellsFilled;
+					++FilledCells;
 					if (number > HighestNumber)
 						HighestNumber = number;
 				}

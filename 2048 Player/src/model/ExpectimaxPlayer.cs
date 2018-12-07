@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
+using Tools.DataStructures;
 using Tools.Math;
 
 namespace Player.Model
@@ -82,15 +84,14 @@ namespace Player.Model
 			if (!state.DoAction(action))
 				return NO_VALUE; // the action was illegal
 
-			var emptyCells = state.GetEmptyCells();
-			double placementProbability = 1.0 / (GameState.TOTAL_CELLS - state.CellsFilled);
+			double placementProbability = 1.0 / state.EmptyCells;
 			double probability_2 = placementProbability * TILE_PROB_2;
 			double probability_4 = placementProbability * TILE_PROB_4;
 			double expectedValue = 0;
 
 			// Tries all possible placements of '2' and '4' tiles, calculating the
 			// value of each outcome and aggregating values into the expected value.
-			foreach (var cell in emptyCells)
+			foreach (var cell in state.GetEmptyCells())
 			{
 				var tile_2 = new Tile(cell, 2);
 				state.AddTile(tile_2);
@@ -112,7 +113,7 @@ namespace Player.Model
 		private double MaxValue(GameState state, ISearchLimit searchLimit)
 		{
 			if (state.IsWin)
-				return 100.0 * state.GoalNumber * state.GoalNumber;
+				return 100.0;
 			else if (state.IsLoss)
 				return 0;
 			else if (searchLimit.Done())
@@ -133,27 +134,44 @@ namespace Player.Model
 		}
 
 		/*
-		 * Returns an estimated value of the given state. The estimate is calculated by
-		 * dividing the sum of the squared numbers on the grid by the squared count of
-		 * tiles.
+		 * Returns an estimated value of the given state. The estimate is a score from
+		 * 0 to 100 calculated as follows:
+		 *		+ up to 60 points proportional to the ratio of empty cells to total cells
+		 *		+ up to 20 points proportional to the ratio of the highest number to the goal number
+		 *		+ 15 points if the highest valued tile is in a corner of the grid
+		 *		+ 5 points if the highest valued tile has an adjacent tile that is half its value
 		 */
-		public double Evaluate(GameState state)
+		private double Evaluate(GameState state)
 		{
-			double sumSq = 0;
-			foreach (Tile t in state.GetTiles())
+			double score = 0;
+			double emptyCellRatio = state.EmptyCells / (double)state.Grid.Cells;
+			score += emptyCellRatio * 60;
+
+			double goalRatio = 1.5 * state.HighestNumber / state.GoalNumber;
+			score += 20 * goalRatio;
+
+			var highestValuedTile = state.GetTiles().First(tile => tile.Value == state.HighestNumber);
+			if (IsCornerCell(highestValuedTile.Cell))
+				score += 15;
+
+			foreach (var neighbor in state.Grid.GetNeighbors(highestValuedTile.Cell, true))
 			{
-				sumSq += t.Value * t.Value;
+				if (neighbor == state.HighestNumber / 2)
+				{
+					score += 5;
+					break;
+				}
 			}
 
-			double score = sumSq / (state.CellsFilled * state.CellsFilled);
-
-			if (state[0, 0] == state.HighestNumber ||
-				state[0, 3] == state.HighestNumber ||
-				state[3, 0] == state.HighestNumber ||
-				state[3, 3] == state.HighestNumber)
-				score *= 1.5;
-
 			return score;
+		}
+
+		private bool IsCornerCell(GridCell cell)
+		{
+			int gridEdge = GameState.GRID_SIZE - 1;
+			bool isEdgeRow = cell.Row == 0 || cell.Row == gridEdge;
+			bool isEdgeColumn = cell.Column == 0 || cell.Column == gridEdge;
+			return isEdgeRow && isEdgeColumn;
 		}
 	}
 }

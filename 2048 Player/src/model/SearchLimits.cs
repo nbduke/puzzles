@@ -28,9 +28,9 @@ namespace Player.Model
 		public DepthLimit(GameState initialState)
 		{
 			Depth = 0;
-			if (initialState.CellsFilled <= 3)
+			if (initialState.FilledCells <= 3)
 				MaxDepth = 2;
-			else if (initialState.CellsFilled <= 12)
+			else if (initialState.FilledCells <= 12)
 				MaxDepth = 3;
 			else
 				MaxDepth = 4;
