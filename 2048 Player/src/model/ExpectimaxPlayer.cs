@@ -7,9 +7,9 @@ using Tools.Math;
 namespace Player.Model
 {
 	/// <summary>
-	/// ExpectimaxPlayer is a parallelized expectimax algorithm implementation applied to the
-	/// 2048 game. The class exposes methods for determining the optimal action to take for a
-	/// particular game state.
+	/// ExpectimaxPlayer applies the expectimax algorithm to the 2048 game. The class
+	/// exposes methods for determining the optimal action to take for a particular game
+	/// state.
 	/// </summary>
 	public class ExpectimaxPlayer
 	{
@@ -147,7 +147,7 @@ namespace Player.Model
 			double emptyCellRatio = state.EmptyCells / (double)state.Grid.Cells;
 			score += emptyCellRatio * 60;
 
-			double goalRatio = 1.5 * state.HighestNumber / state.GoalNumber;
+			double goalRatio = 2.0 * state.HighestNumber / state.GoalNumber;
 			score += 20 * goalRatio;
 
 			var highestValuedTile = state.GetTiles().First(tile => tile.Value == state.HighestNumber);

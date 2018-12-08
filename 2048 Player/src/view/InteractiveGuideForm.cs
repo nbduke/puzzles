@@ -24,6 +24,7 @@ namespace Player.View
 
 		private GameState State;
 		private ExpectimaxPlayer Player;
+		private GameSimulator Simulator;
 		private Mode _Mode;
 		private Button[,] GridButtons;
 		private Button[] ControlButtons;
@@ -35,6 +36,8 @@ namespace Player.View
 			InitializeComponent();
 
 			Player = new ExpectimaxPlayer();
+			Simulator = new GameSimulator();
+
 			GridButtons = new Button[,]
 			{
 				{ button4, button5, button6, button7 },
@@ -103,7 +106,7 @@ namespace Player.View
 
 		private void StartNewGame()
 		{
-			State = GameState.RandomInitialState();
+			State = GameSimulator.RandomInitialState();
 			TurnsTaken = 0;
 			UpdateDisplay();
 			ClearLabels();
@@ -149,32 +152,39 @@ namespace Player.View
 
 		private void DoAction(Model.Action action)
 		{
-			if (State.DoAction(action))
+			bool wasActionTaken = false;
+			if (_Mode == Mode.Play)
+				wasActionTaken = GameSimulator.SimulateAction(State, action);
+			else if (_Mode == Mode.Guide)
+				wasActionTaken = State.DoAction(action);
+
+			if (wasActionTaken)
 			{
 				++TurnsTaken;
-				if (_Mode == Mode.Play || _Mode == Mode.Simulate)
-					State.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
-
 				UpdateDisplay();
+				DisplayEndOfGameIfNeeded();
+			}
+		}
 
-				if (State.IsWin)
-				{
-					PopupDialog winPopup = new PopupDialog(
-						"WIN!!!",
-						"Congratulations, you won!!",
-						this.Location,
-						false);
-					winPopup.ShowDialog(this);
-				}
-				else if (State.IsLoss)
-				{
-					PopupDialog lossPopup = new PopupDialog(
-						"GAME OVER",
-						"Sorry, try again.",
-						this.Location,
-						false);
-					lossPopup.ShowDialog(this);
-				}
+		private void DisplayEndOfGameIfNeeded()
+		{
+			if (State.IsWin)
+			{
+				PopupDialog winPopup = new PopupDialog(
+					"WIN!!!",
+					"Congratulations, you won!!",
+					this.Location,
+					false);
+				winPopup.ShowDialog(this);
+			}
+			else if (State.IsLoss)
+			{
+				PopupDialog lossPopup = new PopupDialog(
+					"GAME OVER",
+					"Sorry, try again.",
+					this.Location,
+					false);
+				lossPopup.ShowDialog(this);
 			}
 		}
 
@@ -362,40 +372,55 @@ namespace Player.View
 		// Play mode
 		private void radioButton1_CheckedChanged(object sender, EventArgs e)
 		{
-			ChangeMode(Mode.Play);
+			if ((sender as RadioButton).Checked)
+				ChangeMode(Mode.Play);
 		}
 
 		private void radioButton2_CheckedChanged(object sender, EventArgs e)
 		{
-			ChangeMode(Mode.Guide);
+			if ((sender as RadioButton).Checked)
+				ChangeMode(Mode.Guide);
 		}
 
 		private void radioButton3_CheckedChanged(object sender, EventArgs e)
 		{
-			ChangeMode(Mode.Simulate);
-			ClearLabels();
-
-			Task.Run(() =>
+			if ((sender as RadioButton).Checked)
 			{
-				ActionValue av = Player.GetPolicy(State, new DepthLimit(State));
+				ChangeMode(Mode.Simulate);
+				ClearLabels();
 
-				while (_Mode == Mode.Simulate && av.Action != Model.Action.NoAction)
+				Simulator.ActionTaken += SimulatorTookAction;
+				Simulator.GameEnded += SimulatedGameEnded;
+
+				Task.Run(() =>
 				{
-					DateTime start = DateTime.Now;
+					Simulator.Play(1, State, () => _Mode != Mode.Simulate);
+				});
+			}
+			else
+			{
+				Simulator.ActionTaken -= SimulatorTookAction;
+				Simulator.GameEnded -= SimulatedGameEnded;
+			}
+		}
 
-					Invoke(new EventHandler(delegate 
-					{
-						DoAction(av.Action);
-						label1.Text = av.Action.ToString();
-					}));
+		private void SimulatorTookAction(Model.Action action, GameState resultState)
+		{
+			Invoke(new EventHandler(delegate
+			{
+				State = resultState;
+				label1.Text = action.ToString();
+				++TurnsTaken;
+				UpdateDisplay();
+			}));
+		}
 
-					av = Player.GetPolicy(State, new DepthLimit(State));
-
-					int duration = (int)(DateTime.Now - start).TotalMilliseconds;
-					if (duration < TimerDelayMs)
-						Thread.Sleep(TimerDelayMs - duration);
-				}
-			});
+		private void SimulatedGameEnded(GameStats result)
+		{
+			Invoke(new EventHandler(delegate
+			{
+				DisplayEndOfGameIfNeeded();
+			}));
 		}
 	}
 }

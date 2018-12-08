@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-
-using Tools;
 using Tools.DataStructures;
 
 namespace Player.Model
@@ -17,8 +14,8 @@ namespace Player.Model
 		public int MinTurnsTaken { get; private set; } = int.MaxValue;
 		public int MaxTurnsTaken { get; private set; } = 0;
 		public double TotalDurationMinutes { get; private set; } = 0;
-		public double MinDurationMinutes { get; private set; } = double.MaxValue;
-		public double MaxDurationMinutes { get; private set; } = 0;
+		public double MinGameDurationMinutes { get; private set; } = double.MaxValue;
+		public double MaxGameDurationMinutes { get; private set; } = 0;
 		public int MostCommonNumberReached { get; private set; } = 0;
 
 		public int Losses
@@ -36,42 +33,23 @@ namespace Player.Model
 			get { return TotalTurnsTaken / (double)GamesPlayed; }
 		}
 
-		public double AverageDurationMinutes
+		public double AverageGameDurationMinutes
 		{
 			get { return TotalDurationMinutes / GamesPlayed; }
+		}
+
+		public double AverageTurnDurationSeconds
+		{
+			get { return TotalDurationMinutes * 60 / TotalTurnsTaken; }
 		}
 
 		private readonly Counter<int> NumbersReached = new Counter<int>();
 
 		/// <summary>
-		/// Creates an empty stats object.
-		/// </summary>
-		/// <remarks>
-		/// The initial values should not be accessed as it may cause undefined behavior.
-		/// </remarks>
-		internal AggregateStats()
-		{
-		}
-
-		/// <summary>
-		/// Calculates stats for a list of games.
-		/// </summary>
-		/// <param name="games">the list of games</param>
-		internal AggregateStats(List<GameStats> games)
-		{
-			Validate.IsNotNull(games, "games");
-
-			foreach (var game in games)
-			{
-				RecordGame(game);
-			}
-		}
-
-		/// <summary>
 		/// Updates statistics for a single game.
 		/// </summary>
 		/// <param name="game">the game</param>
-		internal void RecordGame(GameStats game)
+		public void RecordGame(GameStats game)
 		{
 			++GamesPlayed;
 			if (game.WasWon)
@@ -85,10 +63,10 @@ namespace Player.Model
 			if (game.TurnsTaken > MaxTurnsTaken)
 				MaxTurnsTaken = game.TurnsTaken;
 
-			if (game.DurationMinutes < MinDurationMinutes)
-				MinDurationMinutes = game.DurationMinutes;
-			if (game.DurationMinutes > MaxDurationMinutes)
-				MaxDurationMinutes = game.DurationMinutes;
+			if (game.DurationMinutes < MinGameDurationMinutes)
+				MinGameDurationMinutes = game.DurationMinutes;
+			if (game.DurationMinutes > MaxGameDurationMinutes)
+				MaxGameDurationMinutes = game.DurationMinutes;
 
 			NumbersReached.Increment(game.HighestNumberReached);
 			if (NumbersReached[game.HighestNumberReached] > NumbersReached[MostCommonNumberReached])
@@ -100,7 +78,7 @@ namespace Player.Model
 	/// Represents statistics on a single game of 2048, including the initial and
 	/// final states, the duration in minutes, etc.
 	/// </summary>
-	struct GameStats
+	public struct GameStats
 	{
 		public GameState InitialState;
 		public GameState FinalState;

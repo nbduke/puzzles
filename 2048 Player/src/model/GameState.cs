@@ -24,18 +24,6 @@ namespace Player.Model
 		internal readonly Grid<int> Grid;
 
 		/// <summary>
-		/// Creates an initial state with two tiles placed randomly.
-		/// </summary>
-		/// <param name="goalNumber">the goal number for the state (default is 2048)</param>
-		public static GameState RandomInitialState(int goalNumber = DEFAULT_GOAL)
-		{
-			GameState state = new GameState(goalNumber);
-			state.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
-			state.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
-			return state;
-		}
-
-		/// <summary>
 		/// Constructs a GameState with a number that defines the winning condition.
 		/// </summary>
 		/// <param name="goalNumber">the goal number (default is 2048)</param>
