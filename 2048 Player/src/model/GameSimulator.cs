@@ -9,18 +9,60 @@ namespace Player.Model
 	public delegate void GameEndedHandler(GameStats result);
 
 	/// <summary>
-	/// Simulates playing the 2048 game using ExpectimaxPlayer to choose the action at each step.
+	/// Simulates playing the 2048 game.
 	/// </summary>
 	public class GameSimulator
 	{
-		private const double TILE_PROB_2 = 0.9;
-		private const double TILE_PROB_4 = 1.0 - TILE_PROB_2;
+		public const double TILE_PROB_2 = 0.9;
+		public const double TILE_PROB_4 = 1.0 - TILE_PROB_2;
 
-		private readonly ExpectimaxPlayer Player;
+		private readonly int GamesToPlay;
+		private readonly Func<GameState> GetInitialState;
+		private readonly IGamePlayer Player;
 
-		public GameSimulator()
+		/// <summary>
+		/// Creates a simulation where each game will start from a new random state.
+		/// </summary>
+		/// <param name="gamesToPlay">the number of games to play</param>
+		/// <param name="player">the player providing action decisions</param>
+		/// <param name="goalNumber">the goal number for each new state</param>
+		public GameSimulator(
+			int gamesToPlay,
+			IGamePlayer player = null,
+			int goalNumber = GameState.DEFAULT_GOAL)
+			: this(gamesToPlay, player)
 		{
-			Player = new ExpectimaxPlayer(TILE_PROB_2);
+			GetInitialState = () =>
+			{
+				return RandomInitialState(goalNumber);
+			};
+		}
+
+		/// <summary>
+		/// Creates a simulation where each game will start from a fixed state.
+		/// </summary>
+		/// <param name="gamesToPlay">the number of games to play</param>
+		/// <param name="initialState">the starting state for each game</param>
+		/// <param name="player">the player providing action decisions</param>
+		public GameSimulator(
+			int gamesToPlay,
+			GameState initialState,
+			IGamePlayer player = null)
+			: this(gamesToPlay, player)
+		{
+			GetInitialState = () => initialState;
+		}
+
+		private GameSimulator(int gamesToPlay, IGamePlayer player)
+		{
+			Validate.IsTrue(gamesToPlay >= 0, "Cannot simulate a negative number of games");
+
+			GamesToPlay = gamesToPlay;
+
+			if (player != null)
+				Player = player;
+			else
+				Player = new ExpectimaxPlayer(TILE_PROB_2);
 		}
 
 		/// <summary>
@@ -67,54 +109,25 @@ namespace Player.Model
 		public event GameEndedHandler GameEnded = delegate { };
 
 		/// <summary>
-		/// Plays a number of 2048 games with a different, random initial state each game.
+		/// Runs the simulation.
 		/// </summary>
-		/// <param name="games">the number of games to play</param>
-		/// <param name="goalNumber">the goal number of each game (default is 2048)</param>
-		/// <param name="shouldStop">allows the simulation to be interrupted at any time</returns>
-		public AggregateStats Play(
-			int games,
-			int goalNumber = GameState.DEFAULT_GOAL,
-			Func<bool> shouldStop = null)
+		/// <param name="shouldStop">an optional parameter allowing the simulation to be
+		/// interrupted at any time</param>
+		/// <returns>aggregated statistics over all games played</returns>
+		public AggregateStats Run(Func<bool> shouldStop = null)
 		{
-			Validate.IsTrue(games >= 0, "games cannot be negative");
-
 			if (shouldStop == null)
 				shouldStop = () => false;
 
-			return PlayGames(games, shouldStop, () =>
-			{
-				return RandomInitialState(goalNumber);
-			});
-		}
-
-		/// <summary>
-		/// Plays a number of 2048 games from a fixed starting state.
-		/// </summary>
-		/// <param name="games">the number of games to play</param>
-		/// <param name="initialState">the starting state</param>
-		/// <param name="shouldStop">allows the simulation to be interrupted at any time</returns>
-		public AggregateStats Play(int games, GameState initialState, Func<bool> shouldStop = null)
-		{
-			Validate.IsTrue(games >= 0, "games cannot be negative");
-
-			if (shouldStop == null)
-				shouldStop = () => false;
-
-			return PlayGames(games, shouldStop, () => initialState);
-		}
-
-		private AggregateStats PlayGames(int games, Func<bool> shouldStop, Func<GameState> getInitialState)
-		{
 			var stats = new AggregateStats();
-			for (int i = 0; i < games && !shouldStop(); ++i)
+			for (int i = 0; i < GamesToPlay && !shouldStop(); ++i)
 			{
-				var initialState = getInitialState();
+				var initialState = GetInitialState();
 				GameStarted(initialState);
 
 				var gameResult = PlayGame(initialState, shouldStop);
-				GameEnded(gameResult);
 				stats.RecordGame(gameResult);
+				GameEnded(gameResult);
 			}
 
 			return stats;
@@ -125,14 +138,14 @@ namespace Player.Model
 			GameState state = new GameState(initialState);
 			int turnsTaken = 0;
 			DateTime start = DateTime.Now;
-			ActionValue av = Player.GetPolicy(state, new DepthLimit(state));
+			Action action = Player.GetPolicy(state);
 
-			while (av.Action != Action.NoAction && !shouldStop())
+			while (action != Action.NoAction && !shouldStop())
 			{
-				SimulateAction(state, av.Action);
+				SimulateAction(state, action);
 				++turnsTaken;
-				ActionTaken(av.Action, state);
-				av = Player.GetPolicy(state, new DepthLimit(state));
+				ActionTaken(action, state);
+				action = Player.GetPolicy(state);
 			}
 			DateTime end = DateTime.Now;
 

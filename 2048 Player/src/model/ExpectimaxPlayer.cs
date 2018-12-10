@@ -12,7 +12,7 @@ namespace Player.Model
 	/// exposes methods for determining the optimal action to take for a particular game
 	/// state.
 	/// </summary>
-	public class ExpectimaxPlayer
+	public class ExpectimaxPlayer : IGamePlayer
 	{
 		private const double NO_VALUE = double.MinValue;
 
@@ -36,6 +36,16 @@ namespace Player.Model
 
 			TileProbability2 = tileProbability2;
 			TileProbability4 = 1.0 - tileProbability2;
+		}
+
+		/// <summary>
+		/// Returns the best action to take in a game state using a smart depth
+		/// limit on the search.
+		/// </summary>
+		/// <param name="state">the game state</param>
+		public Action GetPolicy(GameState state)
+		{
+			return GetPolicy(state, new DepthLimit(state)).Action;
 		}
 
 		/// <summary>
