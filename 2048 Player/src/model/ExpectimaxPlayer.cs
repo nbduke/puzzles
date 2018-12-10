@@ -23,6 +23,12 @@ namespace Player.Model
 		private readonly double TileProbability2;
 		private readonly double TileProbability4;
 
+		/// <summary>
+		/// Creates an ExpectimaxPlayer with the probability of getting a new
+		/// '2' tile after taking an action. The complement of this value is
+		/// the probability of getting a '4' tile.
+		/// </summary>
+		/// <param name="tileProbability2">the probability of getting a '2'</param>
 		public ExpectimaxPlayer(double tileProbability2)
 		{
 			Validate.IsTrue(0 <= tileProbability2 && tileProbability2 <= 1,
