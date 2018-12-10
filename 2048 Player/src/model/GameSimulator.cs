@@ -9,15 +9,18 @@ namespace Player.Model
 	public delegate void GameEndedHandler(GameStats result);
 
 	/// <summary>
-	/// Simulates playing the 2048 game using ExpectimaxLearner to choose the action at each step.
+	/// Simulates playing the 2048 game using ExpectimaxPlayer to choose the action at each step.
 	/// </summary>
 	public class GameSimulator
 	{
+		private const double TILE_PROB_2 = 0.9;
+		private const double TILE_PROB_4 = 1.0 - TILE_PROB_2;
+
 		private readonly ExpectimaxPlayer Player;
 
 		public GameSimulator()
 		{
-			Player = new ExpectimaxPlayer();
+			Player = new ExpectimaxPlayer(TILE_PROB_2);
 		}
 
 		/// <summary>
@@ -27,8 +30,8 @@ namespace Player.Model
 		public static GameState RandomInitialState(int goalNumber = GameState.DEFAULT_GOAL)
 		{
 			GameState state = new GameState(goalNumber);
-			state.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
-			state.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
+			state.AddRandomTile(TILE_PROB_2);
+			state.AddRandomTile(TILE_PROB_2);
 			return state;
 		}
 
@@ -43,7 +46,7 @@ namespace Player.Model
 		{
 			bool wasLegal = state.DoAction(action);
 			if (wasLegal)
-				state.AddRandomTile(ExpectimaxPlayer.TILE_PROB_2);
+				state.AddRandomTile(TILE_PROB_2);
 
 			return wasLegal;
 		}
