@@ -13,7 +13,7 @@ namespace Test {
 		public void IsActionLegal_WithNoAction_ReturnsFalse()
 		{
 			// Arrange
-			var state = GameState.RandomInitialState();
+			var state = GameSimulator.RandomInitialState();
 
 			// Act
 			bool result = state.IsActionLegal(Player.Model.Action.NoAction);
@@ -113,7 +113,7 @@ namespace Test {
 		public void DoAction_WithNoAction_StateIsUnchangedAndReturnsFalse()
 		{
 			// Arrange
-			var state = GameState.RandomInitialState();
+			var state = GameSimulator.RandomInitialState();
 			var copy = new GameState(state);
 
 			// Act
