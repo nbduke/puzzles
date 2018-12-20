@@ -176,13 +176,13 @@ namespace Player.Model
 
 			var highestValuedTile = state.GetTiles().First(tile => tile.Value == state.HighestNumber);
 			if (IsCornerCell(highestValuedTile.Cell))
-				score += 15;
+				score += 10;
 
 			foreach (var neighbor in state.Grid.GetNeighbors(highestValuedTile.Cell, true))
 			{
 				if (neighbor == state.HighestNumber / 2)
 				{
-					score += 5;
+					score += 10;
 					break;
 				}
 			}
