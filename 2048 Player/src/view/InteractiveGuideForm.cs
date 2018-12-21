@@ -35,8 +35,7 @@ namespace Player.View
 		{
 			InitializeComponent();
 
-			Player = new ExpectimaxPlayer();
-			Simulator = new GameSimulator();
+			Player = new ExpectimaxPlayer(GameSimulator.TILE_PROB_2);
 
 			GridButtons = new Button[,]
 			{
@@ -389,12 +388,13 @@ namespace Player.View
 				ChangeMode(Mode.Simulate);
 				ClearLabels();
 
+				Simulator = new GameSimulator(1, State, Player);
 				Simulator.ActionTaken += SimulatorTookAction;
 				Simulator.GameEnded += SimulatedGameEnded;
 
 				Task.Run(() =>
 				{
-					Simulator.Play(1, State, () => _Mode != Mode.Simulate);
+					Simulator.Run(() => _Mode != Mode.Simulate);
 				});
 			}
 			else

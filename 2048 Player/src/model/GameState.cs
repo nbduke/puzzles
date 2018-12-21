@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using Tools.DataStructures;
 using Tools.Math;
@@ -345,17 +346,17 @@ namespace Player.Model
 
 		public override string ToString()
 		{
-			string result = string.Empty;
+			var stringBuilder = new StringBuilder();
 			for (int row = 0; row < GRID_SIZE; ++row)
 			{
 				foreach (int number in Grid.RowAt(row))
 				{
-					result += $"{number}  ";
+					stringBuilder.Append($"{number}  ");
 				}
-				result += "\n";
+				stringBuilder.AppendLine();
 			}
 
-			return result;
+			return stringBuilder.ToString();
 		}
 
 		/*

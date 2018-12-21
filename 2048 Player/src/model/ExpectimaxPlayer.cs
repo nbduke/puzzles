@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using Tools;
 using Tools.DataStructures;
 using Tools.Math;
 
@@ -11,24 +12,47 @@ namespace Player.Model
 	/// exposes methods for determining the optimal action to take for a particular game
 	/// state.
 	/// </summary>
-	public class ExpectimaxPlayer
+	public class ExpectimaxPlayer : IGamePlayer
 	{
-		public const double TILE_PROB_2 = 0.9;
-		public const double TILE_PROB_4 = 1.0 - TILE_PROB_2;
-
 		private const double NO_VALUE = double.MinValue;
 
 		private readonly Action[] Actions = new Action[]
 		{
 			Action.Left, Action.Up, Action.Right, Action.Down
 		};
+		private readonly double TileProbability2;
+		private readonly double TileProbability4;
+
+		/// <summary>
+		/// Creates an ExpectimaxPlayer with the probability of getting a new
+		/// '2' tile after taking an action. The complement of this value is
+		/// the probability of getting a '4' tile.
+		/// </summary>
+		/// <param name="tileProbability2">the probability of getting a '2'</param>
+		public ExpectimaxPlayer(double tileProbability2)
+		{
+			Validate.IsTrue(0 <= tileProbability2 && tileProbability2 <= 1,
+				"The argument must be a probability in the range [0, 1]");
+
+			TileProbability2 = tileProbability2;
+			TileProbability4 = 1.0 - tileProbability2;
+		}
+
+		/// <summary>
+		/// Returns the best action to take in a game state using a smart depth
+		/// limit on the search.
+		/// </summary>
+		/// <param name="state">the game state</param>
+		public Action GetPolicy(GameState state)
+		{
+			return GetPolicy(state, new DepthLimit(state)).Action;
+		}
 
 		/// <summary>
 		/// Returns the best action to take in a given state, with its expected value.
 		/// </summary>
 		/// <param name="state">the state</param>
 		/// <param name="searchLimit">defines limits on the search algorithm</param>
-		/// <returns></returns>
 		public ActionValue GetPolicy(GameState state, ISearchLimit searchLimit)
 		{
 			ActionValue result = new ActionValue()
@@ -85,22 +109,22 @@ namespace Player.Model
 				return NO_VALUE; // the action was illegal
 
 			double placementProbability = 1.0 / state.EmptyCells;
-			double probability_2 = placementProbability * TILE_PROB_2;
-			double probability_4 = placementProbability * TILE_PROB_4;
+			double probability2 = placementProbability * TileProbability2;
+			double probability4 = placementProbability * TileProbability4;
 			double expectedValue = 0;
 
 			// Tries all possible placements of '2' and '4' tiles, calculating the
 			// value of each outcome and aggregating values into the expected value.
 			foreach (var cell in state.GetEmptyCells())
 			{
-				var tile_2 = new Tile(cell, 2);
-				state.AddTile(tile_2);
-				expectedValue += MaxValue(state, searchLimit) * probability_2;
+				var tile2 = new Tile(cell, 2);
+				state.AddTile(tile2);
+				expectedValue += MaxValue(state, searchLimit) * probability2;
 				state.RemoveTile(cell);
 
-				var tile_4 = new Tile(cell, 4);
-				state.AddTile(tile_4);
-				expectedValue += MaxValue(state, searchLimit) * probability_4;
+				var tile4 = new Tile(cell, 4);
+				state.AddTile(tile4);
+				expectedValue += MaxValue(state, searchLimit) * probability4;
 				state.RemoveTile(cell);
 			}
 
@@ -152,13 +176,13 @@ namespace Player.Model
 
 			var highestValuedTile = state.GetTiles().First(tile => tile.Value == state.HighestNumber);
 			if (IsCornerCell(highestValuedTile.Cell))
-				score += 15;
+				score += 10;
 
 			foreach (var neighbor in state.Grid.GetNeighbors(highestValuedTile.Cell, true))
 			{
 				if (neighbor == state.HighestNumber / 2)
 				{
-					score += 5;
+					score += 10;
 					break;
 				}
 			}

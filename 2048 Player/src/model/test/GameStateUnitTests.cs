@@ -3,8 +3,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Player.Model;
 
-namespace Test {
-
+namespace Test
+{
 	[TestClass]
 	public class GameStateUnitTests
 	{
@@ -248,5 +248,4 @@ namespace Test {
 		}
 		#endregion
 	}
-
 }
