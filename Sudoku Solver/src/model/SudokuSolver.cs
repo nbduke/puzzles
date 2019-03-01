@@ -7,8 +7,24 @@ using Tools.DataStructures;
 
 namespace SudokuSolver.Model
 {
+	/// <summary>
+	/// Solves Sudoku puzzles.
+	/// </summary>
+	/// <remarks>
+	/// The puzzle is modeled as a constraint satisfaction problem with
+	/// 81 variables (one for each cell in the grid). A backtracking search
+	/// with constraint propagation, arc consistency, and the minimum
+	/// remaining values heuristic is employed.
+	/// </remarks>
 	public class SudokuSolver
 	{
+		/// <summary>
+		/// Solves the Sudoku puzzle represented by a grid of the initial
+		/// known and unknown values. 0 represents an unknown value.
+		/// </summary>
+		/// <param name="initialValues">the initial values of the puzzle</param>
+		/// <returns>a grid with all of the values filled in, or null if
+		/// a solution could not be found</returns>
 		public static Grid<int> Solve(Grid<int> initialValues)
 		{
 			Validate.IsNotNull(initialValues, "initialValues");
@@ -17,6 +33,10 @@ namespace SudokuSolver.Model
 			return solution;
 		}
 
+		/*
+		 * Initialize the possible values for each variable using the known
+		 * initial values.
+		 */
 		private static SudokuGrid InitializeVariables(Grid<int> initialValues)
 		{
 			var puzzleGrid = new SudokuGrid(initialValues);
@@ -38,8 +58,10 @@ namespace SudokuSolver.Model
 		{
 			var nextVariable = GetNextVariable(puzzleGrid);
 			if (nextVariable == null)
-				return puzzleGrid.GetValues();
+				return puzzleGrid.GetValues(); // the base case: the grid is full
 
+			// Save the constraining variables here to avoid generating them on
+			// every iteration below.
 			var constraints = puzzleGrid.GetUnsetNeighbors(nextVariable);
 
 			foreach (int value in nextVariable.GetPossibleValues())
@@ -48,7 +70,7 @@ namespace SudokuSolver.Model
 
 				if (CheckConsistency(nextVariable, constraints))
 				{
-					var nextGrid = UpdateGridForAssignment(nextVariable, puzzleGrid);
+					var nextGrid = UpdateGridForAssignment(nextVariable, constraints, puzzleGrid);
 					var solution = RunBacktrackingSearch(nextGrid);
 					if (solution != null)
 						return solution;
@@ -59,6 +81,9 @@ namespace SudokuSolver.Model
 			return null;
 		}
 
+		/*
+		 * Returns the unset variable with the fewest remaining possible values.
+		 */
 		private static Variable GetNextVariable(SudokuGrid puzzleGrid)
 		{
 			Variable result = null;
@@ -71,17 +96,27 @@ namespace SudokuSolver.Model
 			return result;
 		}
 
+		/*
+		 * Checks if the assigned variable's value is valid by ensuring that, after constraint
+		 * propagation, all of its unset neighbors will still have at least one possible value.
+		 */
 		private static bool CheckConsistency(Variable assigned, IEnumerable<Variable> constraints)
 		{
 			return constraints.All(v => v.PossibleValuesCount > 1 || !v.IsPossibleValue(assigned.Value));
 		}
 
-		private static SudokuGrid UpdateGridForAssignment(Variable assigned, SudokuGrid currentGrid)
+		/*
+		 * Deep copies the grid and propagates the constraints implied by the assigned variable.
+		 */
+		private static SudokuGrid UpdateGridForAssignment(
+			Variable assigned,
+			IEnumerable<Variable> constraints,
+			SudokuGrid currentGrid)
 		{
 			var newGrid = new SudokuGrid(currentGrid);
-			foreach (var neighbor in newGrid.GetUnsetNeighbors(assigned))
+			foreach (var constraint in constraints)
 			{
-				neighbor.RemovePossibleValue(assigned.Value);
+				newGrid[constraint.Location].RemovePossibleValue(assigned.Value);
 			}
 			return newGrid;
 		}

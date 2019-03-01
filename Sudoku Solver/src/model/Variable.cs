@@ -7,6 +7,14 @@ using Tools.DataStructures;
 
 namespace SudokuSolver.Model
 {
+	/// <summary>
+	/// A variable in the constraint satisfaction problem used to model the
+	/// Sudoku puzzle.
+	/// </summary>
+	/// <remarks>
+	/// Each variable has a location, a value (which may not be known), and a
+	/// set of possible values that could be assigned to the variable.
+	/// </remarks>
 	public class Variable
 	{
 		public const int UNSET_VALUE = 0;
@@ -18,11 +26,20 @@ namespace SudokuSolver.Model
 
 		private readonly bool[] PossibleValues;
 
+		/// <summary>
+		/// Constructs an unset variable at a location in the Sudoku puzzle grid.
+		/// </summary>
+		/// <param name="location">the location</param>
 		public Variable(GridCell location)
 			: this(location, UNSET_VALUE)
 		{
 		}
 
+		/// <summary>
+		/// Constructs a variable with a value and location.
+		/// </summary>
+		/// <param name="location">the location</param>
+		/// <param name="value">the value</param>
 		public Variable(GridCell location, int value)
 		{
 			Validate.IsTrue(
@@ -41,6 +58,10 @@ namespace SudokuSolver.Model
 			}
 		}
 
+		/// <summary>
+		/// Makes a deep copy of a variable.
+		/// </summary>
+		/// <param name="other">the variable to copy</param>
 		public Variable(Variable other)
 		{
 			Validate.IsNotNull(other, "other");
@@ -54,6 +75,10 @@ namespace SudokuSolver.Model
 			get { return Value != UNSET_VALUE; }
 		}
 
+		/// <summary>
+		/// Returns an enumerable over the possible values remaining for
+		/// this variable.
+		/// </summary>
 		public IEnumerable<int> GetPossibleValues()
 		{
 			for (int i = 0; i < PossibleValues.Length; ++i)
@@ -63,6 +88,11 @@ namespace SudokuSolver.Model
 			}
 		}
 
+		/// <summary>
+		/// Checks whether a value could possibly be assigned to this variable.
+		/// </summary>
+		/// <param name="value">the value</param>
+		/// <returns>true if possible</returns>
 		public bool IsPossibleValue(int value)
 		{
 			Validate.IsTrue(
@@ -72,6 +102,10 @@ namespace SudokuSolver.Model
 			return PossibleValues[value - 1];
 		}
 
+		/// <summary>
+		/// Removes a value from the set of possible values.
+		/// </summary>
+		/// <param name="value">the value</param>
 		public void RemovePossibleValue(int value)
 		{
 			if (IsPossibleValue(value))
@@ -81,6 +115,12 @@ namespace SudokuSolver.Model
 			}
 		}
 
+		/// <summary>
+		/// Places the variable in the unset state.
+		/// </summary>
+		/// <remarks>
+		/// This only changes the value, not the set of possible values.
+		/// </remarks>
 		public void Unset()
 		{
 			Value = UNSET_VALUE;
