@@ -67,6 +67,7 @@ namespace SudokuSolver.Model
 			Validate.IsNotNull(other, "other");
 			Location = other.Location;
 			Value = other.Value;
+			PossibleValuesCount = other.PossibleValuesCount;
 			PossibleValues = (bool[])other.PossibleValues.Clone();
 		}
 

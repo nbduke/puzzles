@@ -109,7 +109,11 @@ namespace SudokuSolver.Model
 				Variables.RowAt(variable.Location.Row)
 				.Concat(Variables.ColumnAt(variable.Location.Column))
 				.Concat(GetVariablesInSquare(variable.Location));
-			return new HashSet<Variable>(neighborsWithDuplicates);
+
+			var uniqueNeighbors = new HashSet<Variable>(neighborsWithDuplicates);
+			uniqueNeighbors.Remove(variable);
+
+			return uniqueNeighbors;
 		}
 
 		private IEnumerable<Variable> GetVariablesInSquare(GridCell cell)

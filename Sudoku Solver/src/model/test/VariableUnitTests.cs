@@ -93,6 +93,7 @@ namespace Test
 			// Assert
 			Assert.AreEqual(original.Location, copy.Location);
 			Assert.AreEqual(original.Value, copy.Value);
+			Assert.AreEqual(original.PossibleValuesCount - 1, copy.PossibleValuesCount);
 			Assert.IsTrue(original.IsPossibleValue(valueToRemoveFromCopy));
 		}
 		#endregion

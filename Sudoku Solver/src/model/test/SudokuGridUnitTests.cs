@@ -224,22 +224,22 @@ namespace Test
 		}
 
 		[TestMethod]
-		public void GetUnsetNeighbors_VariableIsUnset_ReturnsVariableWithNeighbors()
+		public void GetUnsetNeighbors_VariableIsUnset_ScreensOutVariable()
 		{
 			// Arrange
 			var grid = new SudokuGrid(FullGrid());
 			var variable = grid[0, 2];
+			variable.Unset();
 
-			var expectedVariables = new Variable[]
+			var neighbors = new Variable[]
 			{
-				variable,
 				grid[0, 5], // same row
 				grid[3, 2], // same column
 				grid[1, 0], // same square
 				grid[2, 2]  // same column and square
 			};
 
-			foreach (var neighbor in expectedVariables)
+			foreach (var neighbor in neighbors)
 			{
 				neighbor.Unset();
 			}
@@ -248,7 +248,7 @@ namespace Test
 			var unsetNeighbors = new List<Variable>(grid.GetUnsetNeighbors(variable));
 
 			// Assert
-			CollectionAssert.AreEquivalent(expectedVariables, unsetNeighbors);
+			CollectionAssert.DoesNotContain(unsetNeighbors, variable);
 		}
 		#endregion
 
@@ -302,17 +302,17 @@ namespace Test
 			// Arrange
 			var grid = new SudokuGrid(EmptyGrid());
 			var variable = grid[6, 1];
+			variable.Value = 4;
 
-			var expectedVariables = new Variable[]
+			var neighbors = new Variable[]
 			{
-				variable,
 				grid[6, 6], // same row
 				grid[2, 1], // same column
 				grid[7, 0], // same square
 				grid[6, 0]  // same row and square
 			};
 
-			foreach (var neighbor in expectedVariables)
+			foreach (var neighbor in neighbors)
 			{
 				neighbor.Value = 7;
 			}
@@ -321,7 +321,7 @@ namespace Test
 			var setNeighbors = new List<Variable>(grid.GetSetNeighbors(variable));
 
 			// Assert
-			CollectionAssert.AreEquivalent(expectedVariables, setNeighbors);
+			CollectionAssert.DoesNotContain(setNeighbors, variable);
 		}
 		#endregion
 
