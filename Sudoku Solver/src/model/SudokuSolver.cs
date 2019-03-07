@@ -46,8 +46,6 @@ namespace SudokuSolver.Model
 				foreach (var constraint in puzzleGrid.GetSetNeighbors(unset))
 				{
 					unset.RemovePossibleValue(constraint.Value);
-					if (unset.PossibleValuesCount == 0)
-						return null;
 				}
 			}
 
@@ -77,7 +75,6 @@ namespace SudokuSolver.Model
 				}
 			}
 
-			nextVariable.Unset();
 			return null;
 		}
 
