@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using Tools.DataStructures;
-using WordScramble.Model;
+using Wordplay.Model.Unscramble;
 
 namespace WordScramble.View
 {

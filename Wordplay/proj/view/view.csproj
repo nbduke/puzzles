@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{DAE0A809-32BE-4417-8504-A67D03C7FF5E}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>WordScramble.View</RootNamespace>
-    <AssemblyName>WordScramble</AssemblyName>
+    <RootNamespace>Wordplay.View</RootNamespace>
+    <AssemblyName>Wordplay</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
