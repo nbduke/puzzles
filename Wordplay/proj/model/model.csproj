@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="..\..\src\model\transform\EditDistance.cs" />
+	<Compile Include="..\..\src\model\transform\WordTransformSearchFactory.cs" />
     <Compile Include="..\..\src\model\unscramble\WordFinder.cs" />
     <Compile Include="..\..\src\model\unscramble\WordSearchState.cs" />
   </ItemGroup>

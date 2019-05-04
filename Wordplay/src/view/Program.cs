@@ -5,7 +5,7 @@ using System.IO;
 using Tools.DataStructures;
 using Wordplay.Model.Unscramble;
 
-namespace WordScramble.View
+namespace Wordplay.View.Unscramble
 {
 	class Program
 	{
