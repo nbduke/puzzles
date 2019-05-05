@@ -39,7 +39,7 @@ namespace Wordplay.Model.Transform
 					int costOfInsertA = alignmentGrid[row - 1, col] + 1;
 					int costOfInsertB = alignmentGrid[row, col - 1] + 1;
 					int costOfInsertBoth = alignmentGrid[row - 1, col - 1] +
-						a[row - 1] == b[col - 1] ? 0 : 1;
+						(a[row - 1] == b[col - 1] ? 0 : 1);
 
 					alignmentGrid[row, col] = Min(
 						costOfInsertA,

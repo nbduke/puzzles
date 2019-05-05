@@ -2,77 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 
-using Tools.DataStructures;
-using Wordplay.Model.Unscramble;
+using CommandLine;
 
-namespace Wordplay.View.Unscramble
+namespace Wordplay.View
 {
 	class Program
 	{
-		const string ProgramName = "WordScramble";
-		const int NumRequiredArgs = 3;
-
-		static void Main(string[] args)
+		public static void Main(string[] args)
 		{
-			if (args.Length != NumRequiredArgs)
+			Parser.Default.ParseArguments<ProgramOptions>(args).WithParsed(options =>
 			{
-				HelpMessage();
-				return;
-			}
-
-			try
-			{
-				string scrambledWord = args[0].ToLower();
-				int minimumWordLength = int.Parse(args[1]);
-				string dictFileName = args[2];
-
-				var dictionary = BuildDictionaryFromFile(dictFileName);
-				GenerateOutput(WordFinder.FindUnscrambledWords(scrambledWord, minimumWordLength, dictionary));
-			}
-			catch (FormatException)
-			{
-				ErrorMessage("The provided minimum word length could not be parsed as an integer.");
-			}
-			catch (Exception otherError)
-			{
-				ErrorMessage(otherError.Message);
-			}
-		}
-
-		static void GenerateOutput(List<string> foundWords)
-		{
-			Console.WriteLine("---------------------------------------------------");
-			Console.WriteLine("\t\tFound {0} words:", foundWords.Count);
-			Console.WriteLine("---------------------------------------------------");
-			foundWords.ForEach((word) => { Console.WriteLine(word); });
-		}
-
-		static PrefixTreeDictionary BuildDictionaryFromFile(string filename)
-		{
-			PrefixTreeDictionary dictionary = new PrefixTreeDictionary();
-			using (StreamReader inputFile = new StreamReader(filename))
-			{
-				while (!inputFile.EndOfStream)
-				{
-					string word = inputFile.ReadLine().Trim().ToLower();
-					if (!string.IsNullOrEmpty(word))
-						dictionary.Add(word);
-				}
-			}
-
-			return dictionary;
-		}
-
-		static void HelpMessage()
-		{
-			Console.WriteLine("Usage: " + ProgramName + " <input string> <minimum word length> <dictionary file>");
-		}
-
-		static void ErrorMessage(string message)
-		{
-			Console.WriteLine("-------------------- ERROR --------------------");
-			Console.WriteLine(message);
-			Console.WriteLine("Terminating.");
+				string game = options.Game.Trim().ToLower();
+				if (game == "transform")
+					Transform.Transform.Run(options.DictionaryFile);
+				else if (game == "unscramble")
+					Unscramble.Unscramble.Run(options.DictionaryFile);
+				else
+					Console.WriteLine("You must supply either 'transform' or 'unscramble' as an argument.");
+			});
 		}
 	}
 }

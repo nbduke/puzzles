@@ -2,8 +2,7 @@ using CommandLine;
 
 namespace Wordplay.View.Transform
 {
-	[Verb("transform", HelpText = "Transform one word into a different word one letter at a time")]
-	class TransformOptions : BaseOptions
+	class TransformOptions
 	{
 		[Value(0, Required = true, HelpText = "The starting word")]
 		public string Start { get; set; }

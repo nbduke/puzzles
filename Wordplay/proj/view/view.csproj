@@ -49,10 +49,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-	<Compile Include="..\..\src\view\BaseOptions.cs" />
     <Compile Include="..\..\src\view\Program.cs" />
+	<Compile Include="..\..\src\view\ProgramOptions.cs" />
 	<Compile Include="..\..\src\view\transform\Transform.cs" />
     <Compile Include="..\..\src\view\transform\TransformOptions.cs" />
+	<Compile Include="..\..\src\view\unscramble\Unscramble.cs" />
 	<Compile Include="..\..\src\view\unscramble\UnscrambleOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
