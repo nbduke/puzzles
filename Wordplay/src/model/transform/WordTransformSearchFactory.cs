@@ -11,31 +11,37 @@ namespace Wordplay.Model.Transform
 	public static class WordTransformSearchFactory
 	{
 		public static AStarSearch<string> Create(
-			List<string> allWords,
+			List<string> wordList,
 			string goalWord,
-			bool onlyAllowSubstitutions
+			bool substitutionsOnly
 		)
 		{
-			Validate.IsNotNull(allWords, "allWords");
+			Validate.IsNotNull(wordList, "allWords");
 			Validate.IsNotNullOrEmpty(goalWord);
 
-			return onlyAllowSubstitutions
-				? CreateRestrictedSearch(allWords, goalWord)
-				: CreateGeneralSearch(allWords, goalWord);
+			return substitutionsOnly
+				? CreateRestrictedSearch(wordList, goalWord)
+				: CreateGeneralSearch(wordList, goalWord);
 		}
 
-		private static AStarSearch<string> CreateRestrictedSearch(List<string> allWords, string goalWord)
+		private static AStarSearch<string> CreateRestrictedSearch(List<string> wordList, string goalWord)
 		{
-			var wordGraph = BuildWordGraph(allWords, EditDistance.CountMismatches);
+			var wordGraph = BuildWordGraph(wordList, (a, b) =>
+			{
+				return a.Length == b.Length && EditDistance.CountMismatches(a, b) <= 1;
+			});
 			return new AStarSearch<string>(
 				word => GetChildren(word, wordGraph),
 				word => EditDistance.CountMismatches(word, goalWord)
 			);
 		}
 
-		private static AStarSearch<string> CreateGeneralSearch(List<string> allWords, string goalWord)
+		private static AStarSearch<string> CreateGeneralSearch(List<string> wordList, string goalWord)
 		{
-			var wordGraph = BuildWordGraph(allWords, EditDistance.Calculate);
+			var wordGraph = BuildWordGraph(wordList, (a, b) =>
+			{
+				return Math.Abs(a.Length - b.Length) <= 1 && EditDistance.Calculate(a, b) <= 1;
+			});
 			return new AStarSearch<string>(
 				word => GetChildren(word, wordGraph),
 				word => EditDistance.Calculate(word, goalWord)
@@ -43,20 +49,19 @@ namespace Wordplay.Model.Transform
 		}
 
 		private static Dictionary<string, List<string>> BuildWordGraph(
-			List<string> allWords,
-			Func<string, string, int> getEditDistance
+			List<string> wordList,
+			Func<string, string, bool> shouldConnectWords
 		)
 		{
 			var graph = new Dictionary<string, List<string>>();
-			var arrangement = new Arrangement<string>(allWords);
+			var arrangement = new Arrangement<string>(wordList);
 
 			foreach (var pair in arrangement.GetPairs())
 			{
 				string a = pair.Item1;
 				string b = pair.Item2;
-				int editDistance = getEditDistance(a, b);
 
-				if (editDistance <= 1)
+				if (shouldConnectWords(a, b))
 				{
 					if (!graph.ContainsKey(a))
 						graph[a] = new List<string>();

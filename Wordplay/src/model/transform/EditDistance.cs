@@ -12,11 +12,8 @@ namespace Wordplay.Model.Transform
 			Validate.IsNotNullOrEmpty(a);
 			Validate.IsNotNullOrEmpty(b);
 
-			if (a.Length != b.Length)
-				return int.MaxValue;
-
 			int mismatches = 0;
-			for (int i = 0; i < a.Length; ++i)
+			for (int i = 0; i < a.Length && i < b.Length; ++i)
 			{
 				if (a[i] != b[i])
 					++mismatches;
