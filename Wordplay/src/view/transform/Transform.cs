@@ -4,15 +4,13 @@ using System.IO;
 using System.Linq;
 
 using CommandLine;
-using Tools.Algorithms.Search;
 using Wordplay.Model.Transform;
 
 namespace Wordplay.View.Transform
 {
 	static class Transform
 	{
-		private static AStarSearch<string> SearchAlgorithm;
-		private static TransformOptions PreviousOptions;
+		private static WordTransformer Transformer;
 		private static string WelcomeMessage =
 @"Transform one word into another by changing one character at a time.
 Valid queries have the form:
@@ -21,8 +19,8 @@ If the -s flag is given, only substitutions will be allowed when transforming wo
 
 		public static void Run(string dictionaryFilename)
 		{
+			Initialize(dictionaryFilename);
 			Console.WriteLine(WelcomeMessage);
-			var wordList = GetWordList(dictionaryFilename);
 
 			while (true)
 			{
@@ -35,9 +33,18 @@ If the -s flag is given, only substitutions will be allowed when transforming wo
 				string[] queryArgs = query.Split(' ');
 				Parser.Default.ParseArguments<TransformOptions>(queryArgs).WithParsed(options =>
 				{
-					RunSearch(options, wordList);
+					RunSearch(options);
 				});
 			}
+		}
+
+		private static void Initialize(string dictionaryFilename)
+		{
+			Console.WriteLine("Parsing dictionary...");
+			var wordList = GetWordList(dictionaryFilename);
+
+			Console.WriteLine("Building word graph (this may take a few moments)...");
+			Transformer = new WordTransformer(wordList);
 		}
 
 		private static List<string> GetWordList(string dictionaryFilename)
@@ -56,25 +63,18 @@ If the -s flag is given, only substitutions will be allowed when transforming wo
 			return words;
 		}
 
-		private static void RunSearch(TransformOptions options, List<string> wordList)
+		private static void RunSearch(TransformOptions options)
 		{
-			if (SearchAlgorithm == null || PreviousOptions == null ||
-				PreviousOptions.SubstitutionsOnly != options.SubstitutionsOnly)
+			if (options.SubstitutionsOnly && options.Start.Length != options.End.Length)
 			{
-				Console.WriteLine("Rebuilding word graph...");
-				SearchAlgorithm = WordTransformSearchFactory.Create(
-					wordList,
-					options.End,
-					options.SubstitutionsOnly
+				Console.WriteLine(
+					"When only substitutions are allowed, the start and end words must be the same length."
 				);
+				return;
 			}
 
-			PreviousOptions = options;
-
-			Console.WriteLine($"Transforming '{options.Start}' into '{options.End}'...");
-			var path = SearchAlgorithm.FindPath(options.Start, options.End).ToList();
-
-			if (path.Count == 0)
+			var path = Transformer.Transform(options.Start, options.End, options.SubstitutionsOnly);
+			if (path.Count() == 0)
 			{
 				Console.WriteLine("Looks like this can't be done :(");
 			}
