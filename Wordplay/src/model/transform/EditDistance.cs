@@ -8,6 +8,9 @@ namespace Wordplay.Model.Transform
 {
 	static class EditDistance
 	{
+		/// <summary>
+		/// Calcluates the Hamming distance between two equal-length strings.
+		/// </summary>
 		public static int CalculateHamming(string a, string b)
 		{
 			Validate.IsNotNull(a, "a");
@@ -27,6 +30,15 @@ namespace Wordplay.Model.Transform
 			return mismatches;
 		}
 
+		/// <summary>
+		/// Determines whether two strings are separated by a Hamming distance
+		/// of at most 1.
+		/// </summary>
+		/// <remarks>
+		/// Attempts to short-cut the full Hamming distance calculation by
+		/// returning early if the strings are not Hamming-adjacent.
+		/// </remarks>
+		/// <returns>true if the strings are Hamming-adjacent.</returns>
 		public static bool AreHammingAdjacent(string a, string b)
 		{
 			Validate.IsNotNull(a, "a");
@@ -49,6 +61,13 @@ namespace Wordplay.Model.Transform
 			return true;
 		}
 
+		/// <summary>
+		/// Calculates the Levenshtein distance between two arbitrary strings.
+		/// </summary>
+		/// <remarks>
+		/// This is an implementation of the Needleman-Wunsch algorithm where
+		/// insertions, deletions, and substitutions each cost 1.
+		/// </remarks>
 		public static int CalculateLevenshtein(string a, string b)
 		{
 			Validate.IsNotNull(a, "a");
@@ -96,6 +115,15 @@ namespace Wordplay.Model.Transform
 			return args.Min();
 		}
 
+		/// <summary>
+		/// Determines whether two strings are separated by a Levenshtein distance
+		/// of at most 1.
+		/// </summary>
+		/// <remarks>
+		/// Attempts to short-cut the full Levenshtein distance calculation by
+		/// returning early if the two strings are not Levenshtein-adjacent.
+		/// </remarks>
+		/// <returns>true if the strings are Levenshtein-adjacent</returns>
 		public static bool AreLevenshteinAdjacent(string a, string b)
 		{
 			Validate.IsNotNull(a, "a");
@@ -110,6 +138,10 @@ namespace Wordplay.Model.Transform
 				return AreHammingAdjacent(a, b);
 		}
 
+		/// <summary>
+		/// Determines whether the longer string can be converted into the other
+		/// only by deleting one letter.
+		/// </summary>
 		private static bool AreEqualAfterOneDeletion(string a, string b)
 		{
 			string longer, shorter;
@@ -131,6 +163,7 @@ namespace Wordplay.Model.Transform
 			{
 				if (shorter[shortIndex] != longer[longIndex])
 				{
+					// We've already made one deletion
 					if (shortIndex != longIndex)
 						return false;
 				}

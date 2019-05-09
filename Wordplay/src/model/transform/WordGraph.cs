@@ -8,10 +8,23 @@ using Tools.DataStructures;
 
 namespace Wordplay.Model.Transform
 {
+	/// <summary>
+	/// Represents a graph whose nodes are words. Two nodes are connected
+	/// if they are separated by a Levenshtein distance of one.
+	/// </summary>
 	public class WordGraph
 	{
 		private Dictionary<string, List<string>> Graph;
 
+		/// <summary>
+		/// Constructs the graph from a set of words.
+		/// </summary>
+		/// <remarks>
+		/// The algorithm first buckets the words by length. Since only words whose
+		/// lengths differ by at most one can be Levenshtein-adjacent, we only need
+		/// to consider edges between words in buckets i and i+1.
+		/// </remarks>
+		/// <param name="allWords">the set of words that will become nodes in the graph</param>
 		public WordGraph(List<string> allWords)
 		{
 			Validate.IsNotNull(allWords, "allWords");
@@ -28,22 +41,34 @@ namespace Wordplay.Model.Transform
 				{
 					var bucket = buckets[i];
 					var arrangement = new Arrangement<string>(bucket);
-					AddValidConnections(arrangement.GetPairs());
+
+					// Create edges between words in bucket i
+					AddValidEdges(arrangement.GetPairs());
 
 					if (buckets.ContainsKey(i + 1))
 					{
+						// Create edges between words in buckets i and i+1
 						var nextBucket = buckets[i + 1];
-						AddValidConnections(Combinatorics.CartesianProduct(bucket, nextBucket));
+						AddValidEdges(Combinatorics.CartesianProduct(bucket, nextBucket));
 					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// Returns Hamming-adjacent neighbors of a word. The set of Hamming-adjacent
+		/// words is a subset of the Levenshtein-adjacent words.
+		/// </summary>
+		/// <param name="word">the word whose neighbors are returned</param>
 		public IEnumerable<string> GetHammingAdjacentWords(string word)
 		{
 			return GetLevenshteinAdjacentWords(word).Where(n => n.Length == word.Length);
 		}
 
+		/// <summary>
+		/// Returns Levenshtein-adjacent neighbors of a word.
+		/// </summary>
+		/// <param name="word">the word whose neighbors are returned</param>
 		public IEnumerable<string> GetLevenshteinAdjacentWords(string word)
 		{
 			if (Graph.TryGetValue(word, out List<string> neighbors))
@@ -67,7 +92,7 @@ namespace Wordplay.Model.Transform
 			return buckets;
 		}
 
-		private void AddValidConnections(IEnumerable<Tuple<string, string>> wordPairs)
+		private void AddValidEdges(IEnumerable<Tuple<string, string>> wordPairs)
 		{
 			foreach (var pair in wordPairs)
 			{
@@ -76,13 +101,13 @@ namespace Wordplay.Model.Transform
 
 				if (EditDistance.AreLevenshteinAdjacent(a, b))
 				{
-					AddConnection(a, b);
-					AddConnection(b, a);
+					AddEdge(a, b);
+					AddEdge(b, a);
 				}
 			}
 		}
 
-		private void AddConnection(string node, string neighbor)
+		private void AddEdge(string node, string neighbor)
 		{
 			if (Graph.TryGetValue(node, out List<string> neighbors))
 			{

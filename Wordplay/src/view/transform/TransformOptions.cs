@@ -4,10 +4,10 @@ namespace Wordplay.View.Transform
 {
 	class TransformOptions
 	{
-		[Value(0, Required = true, HelpText = "The starting word")]
+		[Value(0, Required = true, MetaName = "start", HelpText = "The starting word")]
 		public string Start { get; set; }
 
-		[Value(1, Required = true, HelpText = "The ending word")]
+		[Value(1, Required = true, MetaName = "end", HelpText = "The ending word")]
 		public string End { get; set; }
 
 		[Option('s', "substitutions", Required = false, Default = false,

@@ -4,7 +4,7 @@ namespace Wordplay.View.Unscramble
 {
 	class UnscrambleOptions
 	{
-		[Value(0, Required = true, HelpText = "The scrambled letters")]
+		[Value(0, Required = true, MetaName = "letters", HelpText = "The scrambled letters")]
 		public string Letters { get; set; }
 
 		[Option('m', "minWordLength", Required = false, Default = -1,
