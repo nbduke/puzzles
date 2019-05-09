@@ -13,16 +13,15 @@ namespace Wordplay.Model.Transform
 		private AStarSearch<string> RestrictedGraphSearcher;
 		private AStarSearch<string> FullGraphSearcher;
 
-		public WordTransformer(List<string> wordList)
+		public WordTransformer(WordGraph graph)
 		{
-			Validate.IsNotNull(wordList, "wordList");
+			Validate.IsNotNull(graph, "graph");
 
-			var wordGraph = BuildWordGraph(wordList);
 			RestrictedGraphSearcher = new AStarSearch<string>(
-				word => GetHammingAdjacentChildren(word, wordGraph)
+				word => AddWeights(graph.GetHammingAdjacentWords(word))
 			);
 			FullGraphSearcher = new AStarSearch<string>(
-				word => GetLevenshteinAdjacentChildren(word, wordGraph)
+				word => AddWeights(graph.GetLevenshteinAdjacentWords(word))
 			);
 		}
 
@@ -52,53 +51,9 @@ namespace Wordplay.Model.Transform
 			}
 		}
 
-		private static Dictionary<string, List<string>> BuildWordGraph(List<string> wordList)
+		private static IEnumerable<Tuple<string, double>> AddWeights(IEnumerable<string> children)
 		{
-			var graph = new Dictionary<string, List<string>>();
-			var arrangement = new Arrangement<string>(wordList);
-
-			foreach (var pair in arrangement.GetPairs())
-			{
-				string a = pair.Item1;
-				string b = pair.Item2;
-
-				if (EditDistance.AreLevenshteinAdjacent(a, b))
-				{
-					if (!graph.ContainsKey(a))
-						graph[a] = new List<string>();
-					if (!graph.ContainsKey(b))
-						graph[b] = new List<string>();
-
-					graph[a].Add(b);
-					graph[b].Add(a);
-				}
-			}
-
-			return graph;
-		}
-
-		private static IEnumerable<Tuple<string, double>> GetLevenshteinAdjacentChildren(
-			string word,
-			Dictionary<string, List<string>> wordGraph
-		)
-		{
-			if (wordGraph.ContainsKey(word))
-				return wordGraph[word].Select(child => new Tuple<string, double>(child, 1));
-			else
-				return new Tuple<string, double>[] { };
-		}
-
-		private static IEnumerable<Tuple<string, double>> GetHammingAdjacentChildren(
-			string word,
-			Dictionary<string, List<string>> wordGraph
-		)
-		{
-			if (wordGraph.ContainsKey(word))
-				return wordGraph[word]
-					.Where(s => s.Length == word.Length)
-					.Select(child => new Tuple<string, double>(child, 1));
-			else
-				return new Tuple<string, double>[] { };
+			return children.Select(child => new Tuple<string, double>(child, 1));
 		}
 	}
 }

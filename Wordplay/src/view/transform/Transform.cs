@@ -41,13 +41,15 @@ If the -s flag is given, only substitutions will be allowed when transforming wo
 		private static void Initialize(string dictionaryFilename)
 		{
 			Console.WriteLine("Parsing dictionary...");
-			var wordList = GetWordList(dictionaryFilename);
+			var allWords = GetAllWords(dictionaryFilename);
 
 			Console.WriteLine("Building word graph (this may take a few moments)...");
-			Transformer = new WordTransformer(wordList);
+			var wordGraph = new WordGraph(allWords);
+
+			Transformer = new WordTransformer(wordGraph);
 		}
 
-		private static List<string> GetWordList(string dictionaryFilename)
+		private static List<string> GetAllWords(string dictionaryFilename)
 		{
 			var words = new List<string>();
 			using (var dictionaryFile = new StreamReader(dictionaryFilename))
