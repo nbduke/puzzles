@@ -41,10 +41,7 @@ namespace Wordplay.Model.Transform
 
 		public IEnumerable<string> GetHammingAdjacentWords(string word)
 		{
-			if (Graph.TryGetValue(word, out List<string> neighbors))
-				return neighbors.Where(n => n.Length == word.Length);
-			else
-				return new string[] { };
+			return GetLevenshteinAdjacentWords(word).Where(n => n.Length == word.Length);
 		}
 
 		public IEnumerable<string> GetLevenshteinAdjacentWords(string word)
