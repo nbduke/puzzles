@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Tools;
 using Tools.DataStructures;
 
-namespace WordScramble.Model
+namespace Wordplay.Model.Unscramble
 {
 	/*
 	 * Represents a state in the word finding algorithm. A WordScramble puzzle

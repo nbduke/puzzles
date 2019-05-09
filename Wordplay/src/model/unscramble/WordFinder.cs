@@ -6,7 +6,7 @@ using Tools;
 using Tools.Algorithms.Search;
 using Tools.DataStructures;
 
-namespace WordScramble.Model
+namespace Wordplay.Model.Unscramble
 {
 	/// <summary>
 	/// Encapsulates a WordScramble puzzle instance and exposes a method for finding

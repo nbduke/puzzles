@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{DAE0A809-32BE-4417-8504-A67D03C7FF5E}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>WordScramble.View</RootNamespace>
-    <AssemblyName>WordScramble</AssemblyName>
+    <RootNamespace>Wordplay.View</RootNamespace>
+    <AssemblyName>Wordplay</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine, Version=2.5.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.5.0\lib\net45\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="custom-tools, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\custom-tools\bin\custom-tools\Release\custom-tools.dll</HintPath>
@@ -47,10 +50,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\src\view\Program.cs" />
+	<Compile Include="..\..\src\view\ProgramOptions.cs" />
+	<Compile Include="..\..\src\view\transform\Transform.cs" />
+    <Compile Include="..\..\src\view\transform\TransformOptions.cs" />
+	<Compile Include="..\..\src\view\unscramble\Unscramble.cs" />
+	<Compile Include="..\..\src\view\unscramble\UnscrambleOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\model\model.csproj">

@@ -7,7 +7,7 @@
     <ProjectGuid>{CB5592A7-86B3-4A58-852B-87BE3214FC36}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WordScramble.Model</RootNamespace>
+    <RootNamespace>Wordplay.Model.Unscramble</RootNamespace>
     <AssemblyName>model</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <OutputPath>..\..\..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,7 +24,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Release\</OutputPath>
+    <OutputPath>..\..\..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -43,8 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\src\model\WordFinder.cs" />
-    <Compile Include="..\..\src\model\WordSearchState.cs" />
+	<Compile Include="..\..\src\model\transform\EditDistance.cs" />
+	<Compile Include="..\..\src\model\transform\WordGraph.cs" />
+	<Compile Include="..\..\src\model\transform\WordTransformer.cs" />
+    <Compile Include="..\..\src\model\unscramble\WordFinder.cs" />
+    <Compile Include="..\..\src\model\unscramble\WordSearchState.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
