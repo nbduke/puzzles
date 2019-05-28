@@ -14,15 +14,15 @@ I'm a big fan of movies, and I've always been fascinated by the [Six Degrees of 
 
 This program tries to find the shortest path between any two actors, utilizing a bidirectional search over [The Movie Database](https://www.themoviedb.org/) dataset.
 
-# Sudoku Solver
+## Sudoku Solver
 Solves standard sudoku puzzles by modeling the puzzle as a constraint satisfaction problem and applying a heuristic-guided backtracking search to find the solution.
 
-# Wordament
+## Wordament
 Wordament is a word game very similar to Boggle: given a 4x4 grid of tiles, each containing one or more letters, create as many words as you can by concatenating adjacent tiles. (You can find app versions for Android, iOS, and Windows.)
 
 This Windows Forms application serves as a guide to help you ~~cheat at~~ play Wordament. First, you copy the grid of tiles into a form. Then, the program walks you through finding every possible word, in descending order by point value, of course.
 
-# Wordplay
+## Wordplay
 Wordplay is a collection of smaller interactive command-line applications that let you do interesting manipulations with words. You can:
 - Unscramble - Given an arbitrary string, find all words that can be constructed from its letters. You can also find anagrams of the whole string - basically, a word unscrambler.
 - Transform - Transform one word into another by changing, inserting, or deleting one letter at a time, producing a different English word with each change.
