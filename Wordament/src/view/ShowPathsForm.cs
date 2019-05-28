@@ -44,14 +44,16 @@ namespace Wordament.View
 			AllPaths = allPaths;
 			NextPathIdx = 0;
 
-			TilePics = new Grid<PictureBox>(SetupGridForm.GridRows, SetupGridForm.GridColumns,
-				new PictureBox[]
+			TilePics = Grid<PictureBox>.Unflatten(new PictureBox[]
 				{
 					pictureBox2, pictureBox3, pictureBox4, pictureBox5,
 					pictureBox9, pictureBox8, pictureBox7, pictureBox6,
 					pictureBox13, pictureBox12, pictureBox11, pictureBox10,
 					pictureBox17, pictureBox16, pictureBox15, pictureBox14
-				});
+				},
+				SetupGridForm.GridRows,
+				SetupGridForm.GridColumns
+			);
 
 			this.Text = string.Format("Paths - Round {0}", roundNum);
 			pictureBox1.Image = TileImageTable.GetImage(ImageType.Background);

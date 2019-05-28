@@ -45,11 +45,11 @@ namespace Wordament.Model
 			// Run flexible backtracking search starting at each tile in the grid.
 			foreach (var tile in PuzzleGrid)
 			{
-				SearchStartingAtTile(tile, stateSearcher, node => ProcessSearchNode(node));
+				SearchStartingAtTile(tile, stateSearcher);
 
 				if (tile.Type == TileType.Alternating)
 				{
-					SearchStartingAtTile(tile, stateSearcher, node => ProcessSearchNode(node), true);
+					SearchStartingAtTile(tile, stateSearcher, true);
 				}
 			}
 
@@ -81,11 +81,10 @@ namespace Wordament.Model
 		private void SearchStartingAtTile(
 			Tile tile,
 			FlexibleBacktrackingSearch<WordSearchState> stateSearcher,
-			NodeAction<WordSearchState> nodeAction,
 			bool useAlternate = false)
 		{
 			var startingState = new WordSearchState(tile, Dictionary, useAlternate);
-			stateSearcher.Search(startingState, nodeAction);
+			stateSearcher.Search(startingState, node => ProcessSearchNode(node));
 		}
 	};
 }

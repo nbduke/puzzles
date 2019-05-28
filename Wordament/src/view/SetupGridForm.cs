@@ -46,23 +46,27 @@ namespace Wordament.View
 			IsSpeedRound = false;
 			this.Text = string.Format("Setup Grid - Round {0}", RoundNum);
 
-			TileFields = new Grid<TextBox>(GridRows, GridColumns,
-				new TextBox[]
+			TileFields = Grid<TextBox>.Unflatten(new TextBox[]
 				{
 					textBox1, textBox2, textBox3, textBox4,
 					textBox8, textBox7, textBox6, textBox5,
 					textBox12, textBox11, textBox10, textBox9,
 					textBox16, textBox15, textBox14, textBox13
-				});
+				},
+				GridRows,
+				GridColumns
+			);
 
-			ScoreLabels = new Grid<Label>(GridRows, GridColumns,
-				new Label[]
+			ScoreLabels = Grid<Label>.Unflatten(new Label[]
 				{
 					label1, label2, label3, label4,
 					label8, label7, label6, label5,
 					label12, label11, label10, label9,
 					label16, label15, label14, label13
-				});
+				},
+				GridRows,
+				GridColumns
+			);
 		}
 
 		// Go
@@ -112,7 +116,7 @@ namespace Wordament.View
 				}
 			}
 
-			RunWordFinder(new Grid<Tile>(GridRows, GridColumns, tiles));
+			RunWordFinder(Grid<Tile>.Unflatten(tiles, GridRows, GridColumns));
 		}
 
 		/*
