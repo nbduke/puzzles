@@ -20,6 +20,7 @@ namespace CryptogramSolver.Model
 			if (wordsWithCandidates == null)
 				return "";
 
+			dictionary = null; // release this as we don't need it anymore
 			var orderedWords = wordsWithCandidates.Keys.OrderBy(
 				word => wordsWithCandidates[word].Count
 			).ToList();
@@ -33,8 +34,8 @@ namespace CryptogramSolver.Model
 
 		private static IEnumerable<string> GetWords(string cryptogram)
 		{
-			string preprocessed = cryptogram.ToLower().Trim();
-			string noSpecialChars = Regex.Replace(preprocessed, @"[^\w\- ]", "");
+			string trimmed = cryptogram.Trim();
+			string noSpecialChars = Regex.Replace(trimmed, @"[^\w\- ]", "");
 			string[] words = Regex.Split(noSpecialChars, @"[\- ]");
 			return words.Where(w => w.Length > 0);
 		}
@@ -79,7 +80,10 @@ namespace CryptogramSolver.Model
 			foreach (string word in dictionary)
 			{
 				if (!partitionedDictionary.TryGetValue(word.Length, out HashSet<string> partition))
+				{
 					partition = new HashSet<string>();
+					partitionedDictionary.Add(word.Length, partition);
+				}
 
 				partition.Add(word);
 			}

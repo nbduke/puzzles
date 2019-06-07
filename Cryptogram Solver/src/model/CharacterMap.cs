@@ -6,7 +6,7 @@ using Tools;
 
 namespace CryptogramSolver.Model
 {
-	class CharacterMap
+	public class CharacterMap
 	{
 		private const int ALPHABET_SIZE = 26;
 		private const char UNMAPPED = '\0';
@@ -39,8 +39,12 @@ namespace CryptogramSolver.Model
 			var mappings = new List<KeyValuePair<char, char>>();
 			for (int i = 0; i < keys.Length; ++i)
 			{
-				char key = keys[i];
-				char value = values[i];
+				char key = char.ToLower(keys[i]);
+				char value = char.ToLower(values[i]);
+
+				Validate.IsTrue(char.IsLetter(key), "Keys must be letters");
+				Validate.IsTrue(char.IsLetter(value), "Values must be letters");
+
 				char mappedKey = GetKey(value);
 				char mappedValue = GetValue(key);
 
@@ -76,13 +80,22 @@ namespace CryptogramSolver.Model
 
 		public string Decode(string s)
 		{
-			var builder = new StringBuilder(s);
-			foreach (char c in s.ToLower())
+			Validate.IsNotNull(s, "s");
+
+			var builder = new StringBuilder();
+			foreach (char c in s)
 			{
-				if (char.IsLetter(c))
-					builder.Append(GetValue(c));
+				if (TryGetValue(c, out char value))
+				{
+					if (char.IsLower(c))
+						builder.Append(value);
+					else
+						builder.Append(char.ToUpper(value));
+				}
 				else
+				{
 					builder.Append(c);
+				}
 			}
 
 			return builder.ToString();
@@ -96,6 +109,20 @@ namespace CryptogramSolver.Model
 		private char GetKey(char value)
 		{
 			return ReverseMap[ToIndex(value)];
+		}
+
+		private bool TryGetValue(char key, out char value)
+		{
+			if (char.IsLetter(key))
+			{
+				value = Map[ToIndex(char.ToLower(key))];
+				return value != UNMAPPED;
+			}
+			else
+			{
+				value = UNMAPPED;
+				return false;
+			}
 		}
 
 		private void Insert(char key, char value)
