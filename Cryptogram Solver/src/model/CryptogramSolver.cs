@@ -109,7 +109,11 @@ namespace CryptogramSolver.Model
 			string cryptogramWord = cryptogramWords[nextWordIndex];
 			foreach (string candidate in wordsWithCandidates[cryptogramWord])
 			{
-				if (characterMap.TryAddMappings(cryptogramWord, candidate))
+				if (characterMap.TryAddMappings(
+					cryptogramWord,
+					candidate,
+					out List<KeyValuePair<char, char>> newMappings
+				))
 				{
 					if (SolveHelper(
 						characterMap,
@@ -119,7 +123,7 @@ namespace CryptogramSolver.Model
 					))
 						return true;
 					else
-						characterMap.RemoveLastMappingsAdded();
+						characterMap.RemoveMappings(newMappings);
 				}
 			}
 

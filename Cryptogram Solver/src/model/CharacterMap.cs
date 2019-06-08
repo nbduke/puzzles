@@ -13,7 +13,6 @@ namespace CryptogramSolver.Model
 
 		private readonly char[] Map;
 		private readonly char[] ReverseMap;
-		private List<KeyValuePair<char, char>> LastMappingsAdded;
 
 		public CharacterMap()
 		{
@@ -29,6 +28,16 @@ namespace CryptogramSolver.Model
 
 		public bool TryAddMappings(string keys, string values)
 		{
+			var tempList = new List<KeyValuePair<char, char>>();
+			return TryAddMappings(keys, values, out tempList);
+		}
+
+		public bool TryAddMappings(
+			string keys,
+			string values,
+			out List<KeyValuePair<char, char>> mappingsAdded
+		)
+		{
 			Validate.IsNotNull(keys, "keys");
 			Validate.IsNotNull(values, "values");
 			Validate.IsTrue(
@@ -36,7 +45,7 @@ namespace CryptogramSolver.Model
 				"There must be exactly one key for each value."
 			);
 
-			var mappings = new List<KeyValuePair<char, char>>();
+			var newMappings = new List<KeyValuePair<char, char>>();
 			for (int i = 0; i < keys.Length; ++i)
 			{
 				char key = char.ToLower(keys[i]);
@@ -51,25 +60,27 @@ namespace CryptogramSolver.Model
 				if (key != value && mappedValue == UNMAPPED && mappedKey == UNMAPPED)
 				{
 					Insert(key, value);
-					mappings.Add(new KeyValuePair<char, char>(key, value));
+					newMappings.Add(new KeyValuePair<char, char>(key, value));
 				}
 				else if (mappedValue != value)
 				{
-					RemoveMappings(mappings);
+					RemoveMappings(newMappings);
+					mappingsAdded = null;
 					return false;
 				}
 			}
 
-			LastMappingsAdded = mappings;
+			mappingsAdded = newMappings;
 			return true;
 		}
 
-		public void RemoveLastMappingsAdded()
+		public void RemoveMappings(IEnumerable<KeyValuePair<char, char>> mappings)
 		{
-			if (LastMappingsAdded != null)
+			Validate.IsNotNull(mappings, "mappings");
+
+			foreach (var pair in mappings)
 			{
-				RemoveMappings(LastMappingsAdded);
-				LastMappingsAdded = null;
+				Remove(pair.Key, pair.Value);
 			}
 		}
 
@@ -117,14 +128,6 @@ namespace CryptogramSolver.Model
 			{
 				value = UNMAPPED;
 				return false;
-			}
-		}
-
-		private void RemoveMappings(List<KeyValuePair<char, char>> mappings)
-		{
-			foreach (var pair in mappings)
-			{
-				Remove(pair.Key, pair.Value);
 			}
 		}
 

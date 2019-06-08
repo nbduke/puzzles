@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CryptogramSolver.Model.Test
@@ -187,6 +188,49 @@ namespace CryptogramSolver.Model.Test
 			Assert.AreEqual(firstValues, map.Decode(firstKeys));
 			Assert.AreEqual(decodedSecondKeys, map.Decode(secondKeys));
 		}
+
+		[TestMethod]
+		public void TryAddMappings_WithOutParamAndFails_OutParamSetToNull()
+		{
+			// Arrange
+			var map = new CharacterMap();
+
+			// Act
+			bool result = map.TryAddMappings(
+				"howdy",
+				"niilb",
+				out List<KeyValuePair<char, char>> mappingsAdded
+			);
+
+			// Assert
+			Assert.IsFalse(result);
+			Assert.IsNull(mappingsAdded);
+		}
+
+		[TestMethod]
+		public void TryAddMappings_WithOutParamAndSucceeds_OutParamHoldsMappingsJustAdded()
+		{
+			// Arrange
+			var map = new CharacterMap();
+			map.TryAddMappings("foo", "xyy");
+
+			// Act
+			bool result = map.TryAddMappings(
+				"loud",
+				"typg",
+				out List<KeyValuePair<char, char>> mappingsAdded
+			);
+
+			// Assert
+			KeyValuePair<char, char>[] expectedMappings =
+			{
+				new KeyValuePair<char, char>('l', 't'),
+				new KeyValuePair<char, char>('u', 'p'),
+				new KeyValuePair<char, char>('d', 'g')
+			};
+			Assert.IsTrue(result);
+			CollectionAssert.AreEqual(expectedMappings, mappingsAdded);
+		}
 		#endregion
 
 		#region Decode
@@ -279,59 +323,70 @@ namespace CryptogramSolver.Model.Test
 		}
 		#endregion
 
-		#region RemoveLastMappingsAdded
+		#region RemoveMappings
 		[TestMethod]
-		public void RemoveLastMappingsAdded_NoMappingsAdded_NoOp()
+		public void RemoveMappings_MappingsListIsNull_ThrowsNullArgumentException()
 		{
 			// Arrange
 			var map = new CharacterMap();
 
 			// Act
-			map.RemoveLastMappingsAdded();
+			Action action = () =>
+			{
+				map.RemoveMappings(null);
+			};
 
 			// Assert
-			// Pass!
+			Assert.ThrowsException<ArgumentNullException>(action);
 		}
 
 		[TestMethod]
-		public void RemoveLastMappingsAdded_AfterAddingMappings_RemovesMostRecentSetOfKeyValuePairs()
+		public void RemoveMappings_WithKeysAndValuesNotInTheMap_NoOp()
 		{
 			// Arrange
 			var map = new CharacterMap();
-			string firstKeys = "foo";
-			string firstValues = "qii";
-			string secondKeys = "bar";
-
+			string firstKeys = "xz";
+			string firstValues = "mn";
 			map.TryAddMappings(firstKeys, firstValues);
-			map.TryAddMappings(secondKeys, "xob");
+
+			var mappings = new KeyValuePair<char, char>[]
+			{
+				new KeyValuePair<char, char>('a', 'b'),
+				new KeyValuePair<char, char>('c', 'd')
+			};
 
 			// Act
-			map.RemoveLastMappingsAdded();
-
-			// Assert
-			string decodedFirstKeys = map.Decode(firstKeys);
-			Assert.AreEqual(firstValues, decodedFirstKeys);
-			string decodedSecondKeys = map.Decode(secondKeys);
-			Assert.AreEqual(secondKeys, decodedSecondKeys);
-		}
-
-		[TestMethod]
-		public void RemoveLastMappingsAdded_TwiceInARow_SecondCallIsNoOp()
-		{
-			// Arrange
-			var map = new CharacterMap();
-			string firstKeys = "foo";
-			string firstValues = "qii";
-
-			map.TryAddMappings(firstKeys, firstValues);
-			map.TryAddMappings("bar", "xob");
-
-			// Act
-			map.RemoveLastMappingsAdded();
-			map.RemoveLastMappingsAdded();
+			map.RemoveMappings(mappings);
 
 			// Assert
 			Assert.AreEqual(firstValues, map.Decode(firstKeys));
+		}
+
+		[TestMethod]
+		public void RemoveMappings_WithMappingsFromTryAddMappings_RemovesOnlyNewMappings()
+		{
+			// Arrange
+			var map = new CharacterMap();
+			string firstKeys = "dog";
+			string firstValues = "brv";
+			string secondKeys = "top";
+			string secondValues = "wrz";
+
+			map.TryAddMappings(firstKeys, firstValues);
+			string decodedSecondKeys = map.Decode(secondKeys);
+
+			map.TryAddMappings(
+				secondKeys,
+				secondValues,
+				out List<KeyValuePair<char, char>> mappingsAdded
+			);
+
+			// Act
+			map.RemoveMappings(mappingsAdded);
+
+			// Assert
+			Assert.AreEqual(firstValues, map.Decode(firstKeys));
+			Assert.AreEqual(decodedSecondKeys, map.Decode(secondKeys));
 		}
 		#endregion
 	}
