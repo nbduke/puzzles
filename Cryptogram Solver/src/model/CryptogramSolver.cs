@@ -7,8 +7,25 @@ using Tools;
 
 namespace CryptogramSolver.Model
 {
+	/// <summary>
+	/// The core cryptogram solving algorithm.
+	/// </summary>
+	/// <remarks>
+	/// The algorithm is a modified constraint satisfaction problem solver using
+	/// heuristic-guided backtracking search. The variables are the unique words
+	/// of the puzzle, and the values are the respective dictionary words that match
+	/// the length and character pattern of the word. Constraints are propagated
+	/// using a CharacterMap that tracks the mappings between letters. Once all
+	/// encrypted words have been matched to dictionary words, the map can be used
+	/// to decode the original cryptogram.
+	/// </remarks>
 	public static class CryptogramSolver
 	{
+		/// <summary>
+		/// Solves a cryptogram puzzle instance.
+		/// </summary>
+		/// <param name="cryptogram">the cryptogram instance</param>
+		/// <param name="dictionary">the list of words in the dictionary</param>
 		public static string Solve(string cryptogram, IEnumerable<string> dictionary)
 		{
 			Validate.IsNotNullOrEmpty(cryptogram);
@@ -21,6 +38,9 @@ namespace CryptogramSolver.Model
 				return "";
 
 			dictionary = null; // release this as we don't need it anymore
+
+			// Sort the words by number of candidates. Words will be assigned in that order,
+			// approximating a minimum remaining values heuristic.
 			var orderedWords = wordsWithCandidates.Keys.OrderBy(
 				word => wordsWithCandidates[word].Count
 			).ToList();
@@ -32,6 +52,10 @@ namespace CryptogramSolver.Model
 				return "";
 		}
 
+		/*
+		 * Removes special characters, trims whitespace, and splits along spaces
+		 * and dashes.
+		 */
 		private static IEnumerable<string> GetWords(string cryptogram)
 		{
 			string trimmed = cryptogram.Trim();
@@ -40,6 +64,10 @@ namespace CryptogramSolver.Model
 			return words.Where(w => w.Length > 0);
 		}
 
+		/*
+		 * For each word in the cryptogram, finds the set of dictionary words that
+		 * could be associated based on length and character pattern.
+		 */
 		private static Dictionary<string, List<string>> GetCandidatesForWords(
 			IEnumerable<string> cryptogramWords,
 			IEnumerable<string> dictionary
@@ -59,7 +87,7 @@ namespace CryptogramSolver.Model
 					{
 						wordsWithCandidates.Add(
 							word,
-							partition.Where(c => IsCandidate(word, c)).ToList()
+							partition.Where(c => MatchesPattern(word, c)).ToList()
 						);
 					}
 					else
@@ -72,6 +100,9 @@ namespace CryptogramSolver.Model
 			return wordsWithCandidates;
 		}
 
+		/*
+		 * Partitions the dictionary by word length.
+		 */
 		private static Dictionary<int, HashSet<string>> PartitionDictionary(
 			IEnumerable<string> dictionary
 		)
@@ -90,12 +121,22 @@ namespace CryptogramSolver.Model
 			return partitionedDictionary;
 		}
 
-		private static bool IsCandidate(string word, string candidate)
+		/*
+		 * Determines whether a word can be mapped to another word based on its
+		 * character pattern.
+		 *
+		 * For example, "pool" cannot be mapped to "xztj" because the latter does
+		 * not contain two repeated letters in the middle. "xyyj" would work, however.
+		 */
+		private static bool MatchesPattern(string word, string candidate)
 		{
 			var map = new CharacterMap();
 			return map.TryAddMappings(word, candidate);
 		}
 
+		/*
+		 * Runs the backtracking search.
+		 */
 		private static bool SolveHelper(
 			CharacterMap characterMap,
 			Dictionary<string, List<string>> wordsWithCandidates,

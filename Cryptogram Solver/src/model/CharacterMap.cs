@@ -6,6 +6,10 @@ using Tools;
 
 namespace CryptogramSolver.Model
 {
+	/// <summary>
+	/// Represents a bidirectional, one-to-one mapping from the English alphabet
+	/// onto itself.
+	/// </summary>
 	public class CharacterMap
 	{
 		private const int ALPHABET_SIZE = 26;
@@ -26,12 +30,28 @@ namespace CryptogramSolver.Model
 			}
 		}
 
+		/// <summary>
+		/// Tries to update the map by associating a set of keys and values.
+		/// </summary>
+		/// <param name="keys">the keys</param>
+		/// <param name="values">the values</param>
+		/// <returns>true if the mapping was successful. If false,
+		/// the map is not changed</returns>
 		public bool TryAddMappings(string keys, string values)
 		{
 			var tempList = new List<KeyValuePair<char, char>>();
 			return TryAddMappings(keys, values, out tempList);
 		}
 
+		/// <summary>
+		/// Tries to update the map by associating a set of keys and values.
+		/// </summary>
+		/// <param name="keys">the keys</param>
+		/// <param name="values">the values</param>
+		/// <param name="mappingsAdded">the list that will contain the new mappings
+		/// that were added</param>
+		/// <returns>true if the mapping was successful. If false,
+		/// the map is not changed</returns>
 		public bool TryAddMappings(
 			string keys,
 			string values,
@@ -74,6 +94,10 @@ namespace CryptogramSolver.Model
 			return true;
 		}
 
+		/// <summary>
+		/// Removes mappings from the map.
+		/// </summary>
+		/// <param name="mappings">the list of key-value pairs to remove</param>
 		public void RemoveMappings(IEnumerable<KeyValuePair<char, char>> mappings)
 		{
 			Validate.IsNotNull(mappings, "mappings");
@@ -84,6 +108,10 @@ namespace CryptogramSolver.Model
 			}
 		}
 
+		/// <summary>
+		/// Replaces the mapped letters in a string with their values.
+		/// </summary>
+		/// <param name="s">the string</param>
 		public string Decode(string s)
 		{
 			Validate.IsNotNull(s, "s");
