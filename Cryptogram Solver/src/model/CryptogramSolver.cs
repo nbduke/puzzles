@@ -115,7 +115,7 @@ namespace CryptogramSolver.Model
 						characterMap,
 						wordsWithCandidates,
 						cryptogramWords,
-						++nextWordIndex
+						nextWordIndex + 1
 					))
 						return true;
 					else

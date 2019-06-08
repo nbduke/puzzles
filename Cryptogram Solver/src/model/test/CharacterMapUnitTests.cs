@@ -166,6 +166,27 @@ namespace CryptogramSolver.Model.Test
 			// Assert
 			Assert.IsFalse(result);
 		}
+
+		[TestMethod]
+		public void TryAddMappings_FailsWithEntriesInTheMap_MapDoesNotChange()
+		{
+			// Arrange
+			var map = new CharacterMap();
+			string firstKeys = "frogs";
+			string firstValues = "vbnde";
+			string secondKeys = "rugs";
+			string secondValues = "btdf"; // s in "rugs" already mapped to e
+
+			// Act
+			map.TryAddMappings(firstKeys, firstValues);
+			string decodedSecondKeys = map.Decode(secondKeys);
+			bool result = map.TryAddMappings(secondKeys, secondValues);
+
+			// Assert
+			Assert.IsFalse(result);
+			Assert.AreEqual(firstValues, map.Decode(firstKeys));
+			Assert.AreEqual(decodedSecondKeys, map.Decode(secondKeys));
+		}
 		#endregion
 
 		#region Decode

@@ -48,17 +48,14 @@ namespace CryptogramSolver.Model
 				char mappedKey = GetKey(value);
 				char mappedValue = GetValue(key);
 
-				if (
-					key != value
-					&& (mappedKey == UNMAPPED || mappedKey == key)
-					&& (mappedValue == UNMAPPED || mappedValue == value)
-				)
+				if (key != value && mappedValue == UNMAPPED && mappedKey == UNMAPPED)
 				{
 					Insert(key, value);
 					mappings.Add(new KeyValuePair<char, char>(key, value));
 				}
-				else
+				else if (mappedValue != value)
 				{
+					RemoveMappings(mappings);
 					return false;
 				}
 			}
@@ -71,10 +68,8 @@ namespace CryptogramSolver.Model
 		{
 			if (LastMappingsAdded != null)
 			{
-				foreach (var pair in LastMappingsAdded)
-				{
-					Remove(pair.Key, pair.Value);
-				}
+				RemoveMappings(LastMappingsAdded);
+				LastMappingsAdded = null;
 			}
 		}
 
@@ -122,6 +117,14 @@ namespace CryptogramSolver.Model
 			{
 				value = UNMAPPED;
 				return false;
+			}
+		}
+
+		private void RemoveMappings(List<KeyValuePair<char, char>> mappings)
+		{
+			foreach (var pair in mappings)
+			{
+				Remove(pair.Key, pair.Value);
 			}
 		}
 
