@@ -23,5 +23,20 @@ namespace Test
 			else
 				return RandomProvider.Select(legalActions);
 		}
+
+		public IEnumerable<ActionValue> GetPolicies(GameState state)
+		{
+			var legalActions = new List<Action>(state.GetLegalActions());
+			double value = 1.0 / legalActions.Count;
+
+			foreach (Action action in legalActions)
+			{
+				yield return new ActionValue()
+				{
+					Action = action,
+					Value = value
+				};
+			}
+		}
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-using Tools;
 using Tools.DataStructures;
 using Tools.Math;
 
@@ -16,76 +15,47 @@ namespace Player.Model
 	{
 		private const double NO_VALUE = double.MinValue;
 
-		private readonly Action[] Actions = new Action[]
-		{
-			Action.Left, Action.Up, Action.Right, Action.Down
-		};
-		private readonly double TileProbability2;
-		private readonly double TileProbability4;
-
-		/// <summary>
-		/// Creates an ExpectimaxPlayer with the probability of getting a new
-		/// '2' tile after taking an action. The complement of this value is
-		/// the probability of getting a '4' tile.
-		/// </summary>
-		/// <param name="tileProbability2">the probability of getting a '2'</param>
-		public ExpectimaxPlayer(double tileProbability2)
-		{
-			Validate.IsTrue(0 <= tileProbability2 && tileProbability2 <= 1,
-				"The argument must be a probability in the range [0, 1]");
-
-			TileProbability2 = tileProbability2;
-			TileProbability4 = 1.0 - tileProbability2;
-		}
-
 		/// <summary>
 		/// Returns the best action to take in a game state using a smart depth
-		/// limit on the search.
+		/// limit on the search. If no actions are legal, NoAction is returned.
 		/// </summary>
 		/// <param name="state">the game state</param>
 		public Action GetPolicy(GameState state)
 		{
-			return GetPolicy(state, new DepthLimit(state)).Action;
+			return GetPolicy(state, new DepthLimit(state));
 		}
 
 		/// <summary>
-		/// Returns the best action to take in a given state, with its expected value.
+		/// Returns the best action to take in a game state using the given depth limit.
+		/// If no actions are legal, NoAction is returned.
 		/// </summary>
-		/// <param name="state">the state</param>
-		/// <param name="searchLimit">defines limits on the search algorithm</param>
-		public ActionValue GetPolicy(GameState state, ISearchLimit searchLimit)
+		/// <param name="state">the game state</param>
+		/// <param name="searchLimit">the depth limit</param>
+		public Action GetPolicy(GameState state, ISearchLimit searchLimit)
 		{
-			ActionValue result = new ActionValue()
-			{
-				Action = Action.NoAction,
-				Value = NO_VALUE
-			};
-
-			foreach (var actionValue in GetPolicies(state, searchLimit))
-			{
-				if (actionValue.Value > result.Value)
-					result = actionValue;
-			}
-
-			return result;
+			return GetPolicies(state, searchLimit).Best();
 		}
 
 		/// <summary>
-		/// Returns an enumerable of actions that may be taken in a given state with
-		/// their corresponding expected values.
+		/// Returns the list of legal actions in a game state with their corresponding
+		/// expected values.
 		/// </summary>
-		/// <remarks>
-		/// Higher expected values imply better chances of winning from taking the
-		/// corresponding action.
-		/// </remarks>
-		/// <param name="state">the state</param>
-		/// <param name="searchLimit">defines limits on the search algorithm</param>
+		/// <param name="state">the game state</param>
+		/// <returns></returns>
+		public IEnumerable<ActionValue> GetPolicies(GameState state)
+		{
+			return GetPolicies(state, new DepthLimit(state));
+		}
+
+		/// <summary>
+		/// Returns the list of legal actions in a game state with their corresponding
+		/// expected values.
+		/// </summary>
+		/// <param name="state">the game state</param>
+		/// <param name="searchLimit">a depth limit for the search algorithm</param>
 		public IEnumerable<ActionValue> GetPolicies(GameState state, ISearchLimit searchLimit)
 		{
-			var legalActions = new List<Action>(state.GetLegalActions());
-			RandomProvider.Shuffle(legalActions); // break ties randomly
-
-			foreach (var action in legalActions)
+			foreach (var action in ShuffledLegalActions(state))
 			{
 				searchLimit.IncreaseDepth();
 				double value = ExpectedValue(new GameState(state), action, searchLimit);
@@ -105,12 +75,10 @@ namespace Player.Model
 		 */
 		private double ExpectedValue(GameState state, Action action, ISearchLimit searchLimit)
 		{
-			if (!state.DoAction(action))
-				return NO_VALUE; // the action was illegal
-
+			state.ApplyAction(action);
 			double placementProbability = 1.0 / state.EmptyCells;
-			double probability2 = placementProbability * TileProbability2;
-			double probability4 = placementProbability * TileProbability4;
+			double probability2 = placementProbability * Constants.TILE_PROBABILITY_2;
+			double probability4 = placementProbability * Constants.TILE_PROBABILITY_4;
 			double expectedValue = 0;
 
 			// Tries all possible placements of '2' and '4' tiles, calculating the
@@ -144,7 +112,7 @@ namespace Player.Model
 				return Evaluate(state);
 
 			double maxValue = NO_VALUE;
-			foreach (var action in Actions)
+			foreach (var action in ShuffledLegalActions(state))
 			{
 				searchLimit.IncreaseDepth();
 				double expectedValue = ExpectedValue(new GameState(state), action, searchLimit);
@@ -157,13 +125,20 @@ namespace Player.Model
 			return maxValue;
 		}
 
+		private List<Action> ShuffledLegalActions(GameState state)
+		{
+			var legalActions = new List<Action>(state.GetLegalActions());
+			RandomProvider.Shuffle(legalActions);
+			return legalActions;
+		}
+
 		/*
 		 * Returns an estimated value of the given state. The estimate is a score from
 		 * 0 to 100 calculated as follows:
 		 *		+ up to 60 points proportional to the ratio of empty cells to total cells
 		 *		+ up to 20 points proportional to the ratio of the highest number to the goal number
-		 *		+ 15 points if the highest valued tile is in a corner of the grid
-		 *		+ 5 points if the highest valued tile has an adjacent tile that is half its value
+		 *		+ 10 points if the highest valued tile is in a corner of the grid
+		 *		+ 10 points if the highest valued tile has an adjacent tile that is half its value
 		 */
 		private double Evaluate(GameState state)
 		{

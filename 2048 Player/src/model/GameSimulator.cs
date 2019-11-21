@@ -13,9 +13,6 @@ namespace Player.Model
 	/// </summary>
 	public class GameSimulator
 	{
-		public const double TILE_PROB_2 = 0.9;
-		public const double TILE_PROB_4 = 1.0 - TILE_PROB_2;
-
 		private readonly int GamesToPlay;
 		private readonly Func<GameState> GetInitialState;
 		private readonly IGamePlayer Player;
@@ -28,8 +25,8 @@ namespace Player.Model
 		/// <param name="goalNumber">the goal number for each new state</param>
 		public GameSimulator(
 			int gamesToPlay,
-			IGamePlayer player = null,
-			int goalNumber = GameState.DEFAULT_GOAL)
+			IGamePlayer player,
+			int goalNumber = Constants.DEFAULT_GOAL)
 			: this(gamesToPlay, player)
 		{
 			GetInitialState = () =>
@@ -47,7 +44,7 @@ namespace Player.Model
 		public GameSimulator(
 			int gamesToPlay,
 			GameState initialState,
-			IGamePlayer player = null)
+			IGamePlayer player)
 			: this(gamesToPlay, player)
 		{
 			GetInitialState = () => initialState;
@@ -56,24 +53,21 @@ namespace Player.Model
 		private GameSimulator(int gamesToPlay, IGamePlayer player)
 		{
 			Validate.IsTrue(gamesToPlay >= 0, "Cannot simulate a negative number of games");
+			Validate.IsNotNull(player, "player");
 
 			GamesToPlay = gamesToPlay;
-
-			if (player != null)
-				Player = player;
-			else
-				Player = new ExpectimaxPlayer(TILE_PROB_2);
+			Player = player;
 		}
 
 		/// <summary>
 		/// Creates an initial state with two tiles placed randomly.
 		/// </summary>
 		/// <param name="goalNumber">the goal number for the state (default is 2048)</param>
-		public static GameState RandomInitialState(int goalNumber = GameState.DEFAULT_GOAL)
+		public static GameState RandomInitialState(int goalNumber = Constants.DEFAULT_GOAL)
 		{
 			GameState state = new GameState(goalNumber);
-			state.AddRandomTile(TILE_PROB_2);
-			state.AddRandomTile(TILE_PROB_2);
+			state.AddRandomTile();
+			state.AddRandomTile();
 			return state;
 		}
 
@@ -84,13 +78,18 @@ namespace Player.Model
 		/// <param name="state">the game state</param>
 		/// <param name="action">the action</param>
 		/// <returns>true if the action is legal</returns>
-		public static bool SimulateAction(GameState state, Action action)
+		public static bool TakeAction(GameState state, Action action)
 		{
-			bool wasLegal = state.DoAction(action);
-			if (wasLegal)
-				state.AddRandomTile(TILE_PROB_2);
-
-			return wasLegal;
+			if (state.IsActionLegal(action))
+			{
+				state.ApplyAction(action);
+				state.AddRandomTile();
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		/// <summary>
@@ -142,7 +141,7 @@ namespace Player.Model
 
 			while (action != Action.NoAction && !shouldStop())
 			{
-				SimulateAction(state, action);
+				TakeAction(state, action);
 				++turnsTaken;
 				ActionTaken(action, state);
 				action = Player.GetPolicy(state);

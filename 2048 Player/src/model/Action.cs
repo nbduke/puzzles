@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using Tools.DataStructures;
+
 namespace Player.Model
 {
 	/// <summary>
@@ -5,10 +9,10 @@ namespace Player.Model
 	/// </summary>
 	public enum Action
 	{
-		Up = 0,
-		Down,
-		Left,
+		Left = 0,
+		Up,
 		Right,
+		Down,
 		NoAction
 	}
 
@@ -24,6 +28,26 @@ namespace Player.Model
 		{
 			Action = action;
 			Value = value;
+		}
+	}
+
+	public static class ActionValueCollectionExtensions
+	{
+		public static Action Best(this IEnumerable<ActionValue> actionValues)
+		{
+			ActionValue best = new ActionValue()
+			{
+				Action = Action.NoAction,
+				Value = double.MinValue
+			};
+
+			foreach (ActionValue av in actionValues)
+			{
+				if (av.Value > best.Value)
+					best = av;
+			}
+
+			return best.Action;
 		}
 	}
 }

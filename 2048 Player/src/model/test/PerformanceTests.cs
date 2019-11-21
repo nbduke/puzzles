@@ -18,9 +18,9 @@ namespace Test
 		}
 
 		[TestMethod]
-		public void ExpectimaxPlayer_SimpleScoringModel()
+		public void ExpectimaxPlayer()
 		{
-			var simulator = new GameSimulator(GAMES_PER_TRIAL);
+			var simulator = new GameSimulator(GAMES_PER_TRIAL, new ExpectimaxPlayer());
 			RunSimulation(simulator);
 		}
 

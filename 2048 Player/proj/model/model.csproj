@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
 	<Compile Include="..\..\src\model\Action.cs" />
+	<Compile Include="..\..\src\model\Constants.cs" />
 	<Compile Include="..\..\src\model\ExpectimaxPlayer.cs" />
     <Compile Include="..\..\src\model\GameSimulator.cs" />
     <Compile Include="..\..\src\model\GameState.cs" />
