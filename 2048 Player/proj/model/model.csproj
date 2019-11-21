@@ -50,6 +50,8 @@
     <Compile Include="..\..\src\model\GameState.cs" />
 	<Compile Include="..\..\src\model\IGamePlayer.cs" />
     <Compile Include="..\..\src\model\ISearchLimit.cs" />
+	<Compile Include="..\..\src\model\MonteCarloNodes.cs" />
+	<Compile Include="..\..\src\model\MonteCarloPlayer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\..\src\model\SearchLimits.cs" />
 	<Compile Include="..\..\src\model\Stats.cs" />
