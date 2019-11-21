@@ -7,9 +7,7 @@ using Tools.Math;
 namespace Player.Model
 {
 	/// <summary>
-	/// ExpectimaxPlayer applies the expectimax algorithm to the 2048 game. The class
-	/// exposes methods for determining the optimal action to take for a particular game
-	/// state.
+	/// Applies the Expectimax algorithm to play the 2048 game.
 	/// </summary>
 	public class ExpectimaxPlayer : IGamePlayer
 	{
@@ -31,7 +29,7 @@ namespace Player.Model
 		/// </summary>
 		/// <param name="state">the game state</param>
 		/// <param name="searchLimit">the depth limit</param>
-		public Action GetPolicy(GameState state, ISearchLimit searchLimit)
+		public Action GetPolicy(GameState state, IDepthLimit searchLimit)
 		{
 			return GetPolicies(state, searchLimit).Best();
 		}
@@ -52,7 +50,7 @@ namespace Player.Model
 		/// </summary>
 		/// <param name="state">the game state</param>
 		/// <param name="searchLimit">a depth limit for the search algorithm</param>
-		public IEnumerable<ActionValue> GetPolicies(GameState state, ISearchLimit searchLimit)
+		public IEnumerable<ActionValue> GetPolicies(GameState state, IDepthLimit searchLimit)
 		{
 			foreach (var action in ShuffledLegalActions(state))
 			{
@@ -72,7 +70,7 @@ namespace Player.Model
 		 * Calculates the expected value over all possible states that could result from
 		 * taking the given action in the given state.
 		 */
-		private double ExpectedValue(GameState state, Action action, ISearchLimit searchLimit)
+		private double ExpectedValue(GameState state, Action action, IDepthLimit searchLimit)
 		{
 			state.ApplyAction(action);
 			double placementProbability = 1.0 / state.EmptyCells;
@@ -101,7 +99,7 @@ namespace Player.Model
 		/*
 		 * Returns the maximum value over all states reachable from the given state.
 		 */
-		private double MaxValue(GameState state, ISearchLimit searchLimit)
+		private double MaxValue(GameState state, IDepthLimit searchLimit)
 		{
 			if (state.IsWin)
 				return 100.0;

@@ -24,6 +24,13 @@ namespace Test
 			RunSimulation(simulator);
 		}
 
+		[TestMethod]
+		public void MonteCarloPlayer()
+		{
+			var simulator = new GameSimulator(GAMES_PER_TRIAL, new MonteCarloPlayer());
+			RunSimulation(simulator);
+		}
+
 		private void RunSimulation(GameSimulator simulator)
 		{
 			simulator.GameStarted += state =>
