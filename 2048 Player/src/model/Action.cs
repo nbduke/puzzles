@@ -33,6 +33,11 @@ namespace Player.Model
 
 	public static class ActionValueCollectionExtensions
 	{
+		/// <summary>
+		/// Returns the action with the highest expected value from a set of action-value
+		/// pairs. If the set is empty, NoAction is returned.
+		/// </summary>
+		/// <param name="actionValues">the action-values</param>
 		public static Action Best(this IEnumerable<ActionValue> actionValues)
 		{
 			ActionValue best = new ActionValue()

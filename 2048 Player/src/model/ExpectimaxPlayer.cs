@@ -41,7 +41,6 @@ namespace Player.Model
 		/// expected values.
 		/// </summary>
 		/// <param name="state">the game state</param>
-		/// <returns></returns>
 		public IEnumerable<ActionValue> GetPolicies(GameState state)
 		{
 			return GetPolicies(state, new DepthLimit(state));
