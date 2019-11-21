@@ -15,7 +15,6 @@ namespace Player.Model
 	/// </summary>
 	public class GameState
 	{
-		public const int DEFAULT_GOAL = 2048;
 		public const int GRID_SIZE = 4;
 
 		public readonly int GoalNumber;
@@ -28,7 +27,7 @@ namespace Player.Model
 		/// Constructs a GameState with a number that defines the winning condition.
 		/// </summary>
 		/// <param name="goalNumber">the goal number (default is 2048)</param>
-		public GameState(int goalNumber = DEFAULT_GOAL)
+		public GameState(int goalNumber = Constants.DEFAULT_GOAL)
 		{
 			GoalNumber = goalNumber;
 			HighestNumber = 0;
@@ -169,11 +168,14 @@ namespace Player.Model
 		/// </summary>
 		public IEnumerable<Action> GetLegalActions()
 		{
-			foreach (Action a in Enum.GetValues(typeof(Action)))
-			{
-				if (IsActionLegal(a))
-					yield return a;
-			}
+			if (IsActionLegal(Action.Left))
+				yield return Action.Left;
+			if (IsActionLegal(Action.Up))
+				yield return Action.Up;
+			if (IsActionLegal(Action.Right))
+				yield return Action.Right;
+			if (IsActionLegal(Action.Down))
+				yield return Action.Down;
 		}
 
 		/// <summary>
@@ -217,14 +219,15 @@ namespace Player.Model
 		}
 
 		/// <summary>
-		/// Applies an action to this GameState, if legal, causing the numbers to be
-		/// shifted accordingly.
+		/// Applies an action to this GameState, updating the grid as needed.
 		/// </summary>
+		/// <remarks>
+		/// If `a` is not legal, the behavior of this method is undefined.
+		/// </remarks>
 		/// <param name="a">the action</param>
-		/// <returns>true if the action is legal</returns>
-		public bool DoAction(Action a)
+		public void ApplyAction(Action a)
 		{
-			if (IsActionLegal(a))
+			if (a != Action.NoAction)
 			{
 				for (int i = 0; i < GRID_SIZE; ++i)
 				{
@@ -233,12 +236,6 @@ namespace Player.Model
 				}
 
 				UpdateStatistics();
-
-				return true;
-			}
-			else
-			{
-				return false;
 			}
 		}
 
@@ -266,29 +263,26 @@ namespace Player.Model
 		}
 
 		/// <summary>
-		/// Adds a tile to one of the empty cells on the grid, if any.
+		/// Adds a tile to one of the empty cells on the grid. If no cells are empty,
+		/// this method throws InvalidOperationException.
 		/// </summary>
 		/// <remarks>
 		/// The tile's position is chosen uniformly at random from the set of empty
-		/// cells. The tile's value is 2 with the given probability and 4 otherwise.
+		/// cells. The tile's value is chosen with a weighted coin flip.
 		/// </remarks>
-		/// <param name="probability">the probability of placing a 2</param>
-		/// <returns>true if a tile was added</returns>
-		public bool AddRandomTile(double probability)
+		/// <returns>the tile that was added</returns>
+		public Tile AddRandomTile()
 		{
-			if (!IsFull)
-			{
-				var emptyCells = new List<GridCell>(GetEmptyCells());
-				GridCell cell = RandomProvider.Select(emptyCells);
-				int number = RandomProvider.FlipCoin(probability) ? 2 : 4;
-				var tile = new Tile(cell, number);
+			if (IsFull)
+				throw new InvalidOperationException("There are no empty cells to place a tile in.");
 
-				return AddTile(tile);
-			}
-			else
-			{
-				return false;
-			}
+			var emptyCells = new List<GridCell>(GetEmptyCells());
+			GridCell cell = RandomProvider.Select(emptyCells);
+			int number = RandomProvider.FlipCoin(Constants.TILE_PROBABILITY_2) ? 2 : 4;
+			var tile = new Tile(cell, number);
+			AddTile(tile);
+
+			return tile;
 		}
 
 		/// <summary>

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Player.Model
 {
 	public interface IGamePlayer
@@ -7,5 +9,12 @@ namespace Player.Model
 		/// </summary>
 		/// <param name="state">the game state</param>
 		Action GetPolicy(GameState state);
+
+		/// <summary>
+		/// Returns the list of legal actions in a game state with their
+		/// corresponding expected values.
+		/// </summary>
+		/// <param name="state">the game state</param>
+		IEnumerable<ActionValue> GetPolicies(GameState state);
 	}
 }

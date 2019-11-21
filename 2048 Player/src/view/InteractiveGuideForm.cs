@@ -21,7 +21,7 @@ namespace Player.View
 		}
 
 		private GameState State;
-		private ExpectimaxPlayer Player;
+		private IGamePlayer Player;
 		private GameSimulator Simulator;
 		private Mode _Mode;
 		private Button[,] GridButtons;
@@ -33,7 +33,7 @@ namespace Player.View
 		{
 			InitializeComponent();
 
-			Player = new ExpectimaxPlayer(GameSimulator.TILE_PROB_2);
+			Player = new ExpectimaxPlayer();
 
 			GridButtons = new Button[,]
 			{
@@ -151,9 +151,9 @@ namespace Player.View
 		{
 			bool wasActionTaken = false;
 			if (_Mode == Mode.Play)
-				wasActionTaken = GameSimulator.SimulateAction(State, action);
-			else if (_Mode == Mode.Guide)
-				wasActionTaken = State.DoAction(action);
+				wasActionTaken = GameSimulator.TakeAction(State, action);
+			else if (_Mode == Mode.Guide && State.IsActionLegal(action))
+				State.ApplyAction(action);
 
 			if (wasActionTaken)
 			{
@@ -254,7 +254,7 @@ namespace Player.View
 			ClearLabels();
 
 			var async = new Task<List<ActionValue>>(
-				() => new List<ActionValue>(Player.GetPolicies(State, new DepthLimit(State))));
+				() => new List<ActionValue>(Player.GetPolicies(State)));
 
 			async.ContinueWith((parent) =>
 			{

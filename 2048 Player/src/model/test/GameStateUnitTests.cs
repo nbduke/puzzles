@@ -108,24 +108,23 @@ namespace Test
 		}
 		#endregion
 
-		#region DoAction
+		#region ApplyAction
 		[TestMethod]
-		public void DoAction_WithNoAction_StateIsUnchangedAndReturnsFalse()
+		public void ApplyAction_WithNoAction_StateIsUnchanged()
 		{
 			// Arrange
 			var state = GameSimulator.RandomInitialState();
 			var copy = new GameState(state);
 
 			// Act
-			bool result = state.DoAction(Player.Model.Action.NoAction);
+			state.ApplyAction(Player.Model.Action.NoAction);
 
 			// Assert
-			Assert.IsFalse(result);
 			Assert.AreEqual(copy, state);
 		}
 
 		[TestMethod]
-		public void DoAction_ActionIsUpAndIsLegal_UpdatesStateCorrectlyAndReturnsTrue()
+		public void ApplyAction_ActionIsUpAndIsLegal_UpdatesStateCorrectly()
 		{
 			// Arrange
 			var state = new GameState();
@@ -147,15 +146,14 @@ namespace Test
 			expectedState.AddTile(new Tile(0, 3, 2));
 
 			// Act
-			var result = state.DoAction(Player.Model.Action.Up);
+			state.ApplyAction(Player.Model.Action.Up);
 
 			// Assert
-			Assert.IsTrue(result);
 			Assert.AreEqual(expectedState, state);
 		}
 
 		[TestMethod]
-		public void DoAction_ActionIsDownAndIsLegal_UpdatesStateCorrectlyAndReturnsTrue()
+		public void ApplyAction_ActionIsDownAndIsLegal_UpdatesStateCorrectly()
 		{
 			// Arrange
 			var state = new GameState();
@@ -178,15 +176,14 @@ namespace Test
 			expectedState.AddTile(new Tile(3, 2, 2));
 
 			// Act
-			bool result = state.DoAction(Player.Model.Action.Down);
+			state.ApplyAction(Player.Model.Action.Down);
 
 			// Assert
-			Assert.IsTrue(result);
 			Assert.AreEqual(expectedState, state);
 		}
 
 		[TestMethod]
-		public void DoAction_ActionIsRightAndIsLegal_UpdatesStateCorrectlyAndReturnsTrue()
+		public void ApplyAction_ActionIsRightAndIsLegal_UpdatesStateCorrectly()
 		{
 			// Arrange
 			var state = new GameState();
@@ -208,15 +205,14 @@ namespace Test
 			expectedState.AddTile(new Tile(2, 3, 2));
 
 			// Act
-			bool result = state.DoAction(Player.Model.Action.Right);
+			state.ApplyAction(Player.Model.Action.Right);
 
 			// Assert
-			Assert.IsTrue(result);
 			Assert.AreEqual(expectedState, state);
 		}
 
 		[TestMethod]
-		public void DoAction_ActionIsLeftAndIsLegal_UpdatesStateCorrectlyAndReturnsTrue()
+		public void ApplyAction_ActionIsLeftAndIsLegal_UpdatesStateCorrectly()
 		{
 			// Arrange
 			var state = new GameState();
@@ -240,10 +236,9 @@ namespace Test
 			expectedState.AddTile(new Tile(2, 0, 2));
 
 			// Act
-			bool result = state.DoAction(Player.Model.Action.Left);
+			state.ApplyAction(Player.Model.Action.Left);
 
 			// Assert
-			Assert.IsTrue(result);
 			Assert.AreEqual(expectedState, state);
 		}
 		#endregion
