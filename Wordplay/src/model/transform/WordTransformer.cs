@@ -53,7 +53,7 @@ namespace Wordplay.Model.Transform
 
 		private static IEnumerable<Tuple<string, double>> AddWeights(IEnumerable<string> children)
 		{
-			return children.Select(child => new Tuple<string, double>(child, 1));
+			return children.Select(child => Tuple.Create(child, 1.0));
 		}
 	}
 }

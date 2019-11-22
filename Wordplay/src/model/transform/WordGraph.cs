@@ -32,26 +32,16 @@ namespace Wordplay.Model.Transform
 			Graph = new Dictionary<string, List<string>>();
 			var buckets = BucketByLength(allWords);
 
-			int minLength = buckets.Keys.Min();
-			int maxLength = buckets.Keys.Max();
-
-			for (int i = minLength; i < maxLength; ++i)
+			foreach (var pair in buckets)
 			{
-				if (buckets.ContainsKey(i))
-				{
-					var bucket = buckets[i];
-					var arrangement = new Arrangement<string>(bucket);
+				int bucketSize = pair.Key;
+				var bucket = pair.Value;
 
-					// Create edges between words in bucket i
-					AddValidEdges(arrangement.GetPairs());
+				var arrangements = new Arrangement<string>(bucket);
+				AddValidEdges(arrangements.GetPairs());
 
-					if (buckets.ContainsKey(i + 1))
-					{
-						// Create edges between words in buckets i and i+1
-						var nextBucket = buckets[i + 1];
-						AddValidEdges(Combinatorics.CartesianProduct(bucket, nextBucket));
-					}
-				}
+				if (buckets.TryGetValue(bucketSize + 1, out List<string> nextBucket))
+					AddValidEdges(Combinatorics.CartesianProduct(bucket, nextBucket));
 			}
 		}
 
@@ -83,10 +73,13 @@ namespace Wordplay.Model.Transform
 			foreach (var word in allWords)
 			{
 				int length = word.Length;
-				if (!buckets.ContainsKey(length))
-					buckets[length] = new List<string>();
+				if (!buckets.TryGetValue(length, out List<string> bucket))
+				{
+					bucket = new List<string>();
+					buckets.Add(length, bucket);
+				}
 
-				buckets[length].Add(word);
+				bucket.Add(word);
 			}
 
 			return buckets;
@@ -109,16 +102,13 @@ namespace Wordplay.Model.Transform
 
 		private void AddEdge(string node, string neighbor)
 		{
-			if (Graph.TryGetValue(node, out List<string> neighbors))
-			{
-				neighbors.Add(neighbor);
-			}
-			else
+			if (!Graph.TryGetValue(node, out List<string> neighbors))
 			{
 				neighbors = new List<string>();
-				neighbors.Add(neighbor);
-				Graph[node] = neighbors;
+				Graph.Add(node, neighbors);
 			}
+
+			neighbors.Add(neighbor);
 		}
 	}
 }
